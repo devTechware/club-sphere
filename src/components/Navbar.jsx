@@ -1,109 +1,189 @@
 import { Link, NavLink } from "react-router";
+import { useState } from "react";
 import useAuth from "../hooks/useAuth";
 import toast from "react-hot-toast";
+import { FaRocket, FaTachometerAlt, FaSignOutAlt } from "react-icons/fa";
+import { motion } from "framer-motion";
 
 const Navbar = () => {
   const { user, logOut } = useAuth();
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const handleLogout = async () => {
     try {
       await logOut();
       toast.success("Logged out successfully");
     } catch (error) {
-      error && toast.error("Error logging out");
+      toast.error("Error logging out");
     }
   };
 
-  const navLinks = (
-    <>
-      <li>
-        <NavLink to="/">Home</NavLink>
-      </li>
-      <li>
-        <NavLink to="/clubs">Clubs</NavLink>
-      </li>
-      <li>
-        <NavLink to="/events">Events</NavLink>
-      </li>
-    </>
-  );
+  const navLinks = [
+    { to: "/", label: "Home" },
+    { to: "/clubs", label: "Clubs" },
+    { to: "/events", label: "Events" },
+  ];
 
   return (
-    <div className="navbar bg-base-100 shadow-lg px-4">
-      <div className="navbar-start">
-        <div className="dropdown">
-          <div tabIndex={0} role="button" className="btn btn-ghost lg:hidden">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-5 w-5"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d="M4 6h16M4 12h8m-8 6h16"
-              />
-            </svg>
-          </div>
-          <ul
-            tabIndex={0}
-            className="menu menu-sm dropdown-content bg-base-100 rounded-box z-1 mt-3 w-52 p-2 shadow"
+    <motion.div
+      initial={{ y: -100 }}
+      animate={{ y: 0 }}
+      transition={{ duration: 0.5 }}
+      className="bg-white shadow-lg sticky top-0 z-50 border-b-2 border-base-200"
+    >
+      <div className="navbar container mx-auto px-4">
+        {/* Logo - Left */}
+        <div className="navbar-start">
+          <Link
+            to="/"
+            className="flex items-center gap-2 hover:opacity-80 transition-opacity"
           >
-            {navLinks}
+            <motion.div
+              whileHover={{ rotate: 15 }}
+              className="bg-linear-to-br from-primary to-secondary p-2 rounded-lg"
+            >
+              <FaRocket className="text-white text-xl" />
+            </motion.div>
+            <span className="text-2xl font-black text-neutral">
+              Club<span className="text-primary">Sphere</span>
+            </span>
+          </Link>
+        </div>
+
+        {/* Nav Links - Center */}
+        <div className="navbar-center hidden lg:flex">
+          <ul className="menu menu-horizontal px-1 gap-1">
+            {navLinks.map((link) => (
+              <li key={link.to}>
+                <NavLink
+                  to={link.to}
+                  className={({ isActive }) =>
+                    `font-semibold px-4 rounded-lg ${
+                      isActive
+                        ? "bg-primary text-white"
+                        : "text-neutral hover:bg-base-200"
+                    }`
+                  }
+                >
+                  {link.label}
+                </NavLink>
+              </li>
+            ))}
           </ul>
         </div>
-        <Link to="/" className="btn btn-ghost text-xl font-bold">
-          ClubSphere
-        </Link>
-      </div>
-      <div className="navbar-center hidden lg:flex">
-        <ul className="menu menu-horizontal px-1">{navLinks}</ul>
-      </div>
-      <div className="navbar-end gap-2">
-        {user ? (
-          <div className="dropdown dropdown-end">
+
+        {/* Auth Buttons / User Menu - Right */}
+        <div className="navbar-end">
+          {user ? (
+            <div className="dropdown dropdown-end">
+              <div
+                tabIndex={0}
+                role="button"
+                className="btn btn-ghost btn-circle avatar border-2 border-primary"
+              >
+                <div className="w-10 rounded-full">
+                  <img
+                    alt={user?.displayName || "User"}
+                    src={
+                      user?.photoURL ||
+                      "https://ui-avatars.com/api/?name=" + user?.displayName
+                    }
+                  />
+                </div>
+              </div>
+              <ul
+                tabIndex={0}
+                className="menu menu-sm dropdown-content bg-base-100 rounded-box z-1 mt-3 w-56 p-2 shadow-xl border border-base-200"
+              >
+                <li className="menu-title px-4 py-2">
+                  <div>
+                    <span className="font-bold text-sm">
+                      {user?.displayName}
+                    </span>
+                    <span className="text-xs text-gray-500">{user?.email}</span>
+                  </div>
+                </li>
+                <div className="divider my-1"></div>
+                <li>
+                  <Link
+                    to="/dashboard/member"
+                    className="flex items-center gap-2"
+                  >
+                    <FaTachometerAlt />
+                    Dashboard
+                  </Link>
+                </li>
+                <li>
+                  <a
+                    onClick={handleLogout}
+                    className="flex items-center gap-2 text-error"
+                  >
+                    <FaSignOutAlt />
+                    Logout
+                  </a>
+                </li>
+              </ul>
+            </div>
+          ) : (
+            <div className="flex items-center gap-2">
+              <Link to="/login" className="btn btn-ghost font-semibold">
+                Login
+              </Link>
+              <Link to="/register" className="btn btn-primary font-semibold">
+                Sign Up
+              </Link>
+            </div>
+          )}
+
+          {/* Mobile Menu Button */}
+          <div className="dropdown dropdown-end lg:hidden ml-2">
             <div
               tabIndex={0}
               role="button"
-              className="btn btn-ghost btn-circle avatar"
+              className="btn btn-ghost"
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
             >
-              <div className="w-10 rounded-full">
-                <img
-                  alt={user?.displayName || "User"}
-                  src={user?.photoURL || "https://via.placeholder.com/150"}
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-5 w-5"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M4 6h16M4 12h8m-8 6h16"
                 />
-              </div>
+              </svg>
             </div>
-            <ul
-              tabIndex={0}
-              className="menu menu-sm dropdown-content bg-base-100 rounded-box z-1 mt-3 w-52 p-2 shadow"
-            >
-              <li className="menu-title">
-                <span>{user?.displayName || "User"}</span>
-              </li>
-              <li>
-                <Link to="/dashboard/member">Dashboard</Link>
-              </li>
-              <li>
-                <a onClick={handleLogout}>Logout</a>
-              </li>
-            </ul>
+            {isMenuOpen && (
+              <ul
+                tabIndex={0}
+                className="menu menu-sm dropdown-content bg-base-100 rounded-box z-1 mt-3 w-52 p-2 shadow-xl border border-base-200"
+              >
+                {navLinks.map((link) => (
+                  <li key={link.to}>
+                    <NavLink
+                      to={link.to}
+                      className={({ isActive }) =>
+                        `font-semibold ${
+                          isActive ? "bg-primary text-white" : ""
+                        }`
+                      }
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      {link.label}
+                    </NavLink>
+                  </li>
+                ))}
+              </ul>
+            )}
           </div>
-        ) : (
-          <>
-            <Link to="/login" className="btn btn-primary btn-sm">
-              Login
-            </Link>
-            <Link to="/register" className="btn btn-outline btn-sm">
-              Register
-            </Link>
-          </>
-        )}
+        </div>
       </div>
-    </div>
+    </motion.div>
   );
 };
 

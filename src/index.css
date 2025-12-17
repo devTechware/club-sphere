@@ -1,11 +1,258 @@
 @import "tailwindcss";
+
 @plugin "daisyui" {
-  themes: light --default;
+  themes: [light, dark];
 }
 
 @plugin "daisyui/theme" {
-  name: "light";
+  name: "clubsphere";
   default: true;
-  --color-primary: blue;
-  --color-secondary: teal;
+
+  /* Unique Vibrant Color Scheme - Energetic & Modern */
+  --color-primary: #ff6b6b; /* Coral Red - Energetic & Passionate */
+  --color-primary-content: #ffffff;
+
+  --color-secondary: #4ecdc4; /* Turquoise - Fresh & Vibrant */
+  --color-secondary-content: #ffffff;
+
+  --color-accent: #ffe66d; /* Sunshine Yellow - Warm & Inviting */
+  --color-accent-content: #1a1a1a;
+
+  --color-neutral: #2d3748; /* Charcoal */
+  --color-neutral-content: #ffffff;
+
+  --color-base-100: #ffffff; /* Pure White */
+  --color-base-200: #faf9f7; /* Warm White */
+  --color-base-300: #f0ede6; /* Cream */
+  --color-base-content: #1a1a1a; /* Almost Black */
+
+  --color-info: #3b82f6; /* Blue */
+  --color-info-content: #ffffff;
+
+  --color-success: #26de81; /* Fresh Green */
+  --color-success-content: #ffffff;
+
+  --color-warning: #fd9644; /* Orange */
+  --color-warning-content: #ffffff;
+
+  --color-error: #fc5c65; /* Bright Red */
+  --color-error-content: #ffffff;
+
+  --rounded-box: 1.5rem;
+  --rounded-btn: 0.75rem;
+  --rounded-badge: 2rem;
+
+  --animation-btn: 0.25s;
+  --animation-input: 0.2s;
+
+  --btn-focus-scale: 0.97;
+  --border-btn: 2px;
+  --tab-border: 2px;
+  --tab-radius: 0.75rem;
+}
+
+/* Custom scrollbar - Coral theme */
+::-webkit-scrollbar {
+  width: 12px;
+}
+
+::-webkit-scrollbar-track {
+  background: #faf9f7;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #ff6b6b 0%, #4ecdc4 100%);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #ee5a52 0%, #45b8af 100%);
+}
+
+/* Smooth animations */
+* {
+  transition-property: color, background-color, border-color,
+    text-decoration-color, fill, stroke, transform;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 200ms;
+}
+
+/* Unique Gradient Backgrounds */
+.gradient-primary {
+  background: linear-gradient(135deg, #ff6b6b 0%, #ff8e53 100%);
+}
+
+.gradient-secondary {
+  background: linear-gradient(135deg, #4ecdc4 0%, #44a08d 100%);
+}
+
+.gradient-accent {
+  background: linear-gradient(135deg, #ffe66d 0%, #ffbe76 100%);
+}
+
+.gradient-hero {
+  background: linear-gradient(135deg, #ff6b6b 0%, #4ecdc4 50%, #ffe66d 100%);
+}
+
+.gradient-dark {
+  background: linear-gradient(135deg, #2d3748 0%, #1a202c 100%);
+}
+
+/* Animated gradient background */
+.animated-gradient {
+  background: linear-gradient(270deg, #ff6b6b, #4ecdc4, #ffe66d, #ff6b6b);
+  background-size: 800% 800%;
+  animation: gradientShift 15s ease infinite;
+}
+
+@keyframes gradientShift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+/* Card hover effects with shadow */
+.card-hover {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 2px solid transparent;
+}
+
+.card-hover:hover {
+  transform: translateY(-10px) scale(1.02);
+  box-shadow: 0 20px 40px -10px rgba(255, 107, 107, 0.3),
+    0 10px 20px -5px rgba(78, 205, 196, 0.2);
+  border-color: #ff6b6b;
+}
+
+/* Glowing text gradient */
+.text-gradient {
+  background: linear-gradient(135deg, #ff6b6b 0%, #4ecdc4 50%, #ffe66d 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  background-size: 200% auto;
+  animation: shimmer 3s linear infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: 0% 0%;
+  }
+  100% {
+    background-position: 200% 0%;
+  }
+}
+
+/* Button animations */
+.btn {
+  position: relative;
+  overflow: hidden;
+  font-weight: 600;
+  letter-spacing: 0.025em;
+}
+
+.btn::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.3),
+    transparent
+  );
+  transition: left 0.5s;
+}
+
+.btn:hover::before {
+  left: 100%;
+}
+
+/* Floating animation */
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-20px);
+  }
+}
+
+.float {
+  animation: float 3s ease-in-out infinite;
+}
+
+/* Pulse animation */
+@keyframes pulse-custom {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(1.05);
+  }
+}
+
+.pulse-custom {
+  animation: pulse-custom 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Badge with glow */
+.badge-glow {
+  box-shadow: 0 0 20px rgba(255, 107, 107, 0.5);
+  animation: glow 2s ease-in-out infinite;
+}
+
+@keyframes glow {
+  0%,
+  100% {
+    box-shadow: 0 0 20px rgba(255, 107, 107, 0.5);
+  }
+  50% {
+    box-shadow: 0 0 30px rgba(255, 107, 107, 0.8);
+  }
+}
+
+/* Glassmorphism effect */
+.glass {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* Section divider */
+.section-divider {
+  height: 4px;
+  background: linear-gradient(90deg, #ff6b6b, #4ecdc4, #ffe66d);
+  border-radius: 2px;
+  margin: 4rem 0;
+}
+
+/* Background patterns */
+.pattern-dots {
+  background-image: radial-gradient(circle, #ff6b6b 1px, transparent 1px);
+  background-size: 30px 30px;
+  opacity: 0.1;
+}
+
+.pattern-grid {
+  background-image: linear-gradient(
+      rgba(255, 107, 107, 0.1) 1px,
+      transparent 1px
+    ),
+    linear-gradient(90deg, rgba(78, 205, 196, 0.1) 1px, transparent 1px);
+  background-size: 50px 50px;
 }
