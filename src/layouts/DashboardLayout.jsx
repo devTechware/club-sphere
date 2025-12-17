@@ -1,6 +1,6 @@
 import { Link, Outlet, useNavigate } from "react-router";
 import useAuth from "../hooks/useAuth";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import api from "../utils/api";
 import toast from "react-hot-toast";
@@ -8,10 +8,9 @@ import toast from "react-hot-toast";
 const DashboardLayout = () => {
   const { user, logOut } = useAuth();
   const navigate = useNavigate();
-  const [userRole, setUserRole] = useState(null);
 
   // Fetch user profile to get role
-  const { data: profile } = useQuery({
+  const { data: profile, isLoading } = useQuery({
     queryKey: ["userProfile", user?.email],
     queryFn: async () => {
       const response = await api.get("/users/profile");
@@ -20,19 +19,20 @@ const DashboardLayout = () => {
     enabled: !!user,
   });
 
+  const userRole = profile?.role;
+
   useEffect(() => {
-    if (profile?.role) {
-      setUserRole(profile.role);
-      // Redirect to appropriate dashboard
-      if (profile.role === "admin" && window.location.pathname === "/dashboard") {
-        navigate("/dashboard/admin");
-      } else if (profile.role === "clubManager" && window.location.pathname === "/dashboard") {
-        navigate("/dashboard/manager");
-      } else if (profile.role === "member" && window.location.pathname === "/dashboard") {
-        navigate("/dashboard/member");
+    // Redirect to appropriate dashboard only on initial load
+    if (userRole && window.location.pathname === "/dashboard") {
+      if (userRole === "admin") {
+        navigate("/dashboard/admin", { replace: true });
+      } else if (userRole === "clubManager") {
+        navigate("/dashboard/manager", { replace: true });
+      } else if (userRole === "member") {
+        navigate("/dashboard/member", { replace: true });
       }
     }
-  }, [profile, navigate]);
+  }, [userRole, navigate]);
 
   const handleLogout = async () => {
     try {
@@ -43,6 +43,14 @@ const DashboardLayout = () => {
       error && toast.error("Error logging out");
     }
   };
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <span className="loading loading-spinner loading-lg"></span>
+      </div>
+    );
+  }
 
   const adminLinks = (
     <>
