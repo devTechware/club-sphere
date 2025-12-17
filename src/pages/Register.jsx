@@ -12,10 +12,8 @@ const Register = () => {
     register,
     handleSubmit,
     formState: { errors },
-    watch,
+    getValues,
   } = useForm();
-
-  const password = watch("password");
 
   const onSubmit = async (data) => {
     try {
@@ -104,7 +102,7 @@ const Register = () => {
             {/* Photo URL */}
             <div className="form-control">
               <label className="label">
-                <span className="label-text">Photo URL</span>
+                <span className="label-text">Photo URL (Optional)</span>
               </label>
               <input
                 type="url"
@@ -175,7 +173,7 @@ const Register = () => {
                 {...register("confirmPassword", {
                   required: "Please confirm your password",
                   validate: (value) =>
-                    value === password || "Passwords do not match",
+                    value === getValues("password") || "Passwords do not match",
                 })}
               />
               {errors.confirmPassword && (
