@@ -13,6 +13,9 @@ import DashboardLayout from "../layouts/DashboardLayout";
 import AdminDashboard from "../pages/dashboard/AdminDashboard";
 import ManagerDashboard from "../pages/dashboard/ManagerDashboard";
 import MemberDashboard from "../pages/dashboard/MemberDashboard";
+import ManageUsers from "../pages/dashboard/ManageUsers";
+import ManageClubs from "../pages/dashboard/ManageClubs";
+import ManagePayments from "../pages/dashboard/ManagePayments";
 
 const router = createBrowserRouter([
   {
@@ -61,6 +64,18 @@ const router = createBrowserRouter([
       {
         path: "admin",
         element: <AdminDashboard />,
+      },
+      {
+        path: "admin/users",
+        element: <ManageUsers />,
+      },
+      {
+        path: "admin/clubs",
+        element: <ManageClubs />,
+      },
+      {
+        path: "admin/payments",
+        element: <ManagePayments />,
       },
       {
         path: "manager",

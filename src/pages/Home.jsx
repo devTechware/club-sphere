@@ -1,7 +1,7 @@
 import { Link } from "react-router";
 import { motion } from "framer-motion";
 import { useFeaturedClubs } from "../hooks/useClubs";
-import { useUpcomingEvents } from "../hooks/useEvents";
+import { useEvents, useUpcomingEvents } from "../hooks/useEvents";
 import {
   FaUsers,
   FaCalendar,
@@ -18,9 +18,11 @@ import {
 
 const Home = () => {
   const { data: featuredClubs, isLoading: clubsLoading } = useFeaturedClubs();
-  const { data: upcomingEvents, isLoading: eventsLoading } =
-    useUpcomingEvents();
-
+  // const { data: upcomingEvents, isLoading: eventsLoading } =
+  //   useUpcomingEvents();
+  const { data: upcomingEvents, isLoading: eventsLoading } = useEvents();
+  //console.log(upcomingEvents);
+  
   const fadeInUp = {
     hidden: { opacity: 0, y: 40 },
     visible: {
@@ -181,7 +183,7 @@ const Home = () => {
       </section>
 
       {/* Features Section - Card Grid */}
-      <section className="py-24 bg-gradient-to-b from-base-100 to-base-200 relative">
+      <section className="py-24 bg-linear-to-b from-base-100 to-base-200 relative">
         <div className="pattern-dots absolute inset-0"></div>
 
         <div className="container mx-auto px-4 relative z-10">
@@ -216,7 +218,7 @@ const Home = () => {
               >
                 <div className="card-body items-center text-center p-8">
                   <div
-                    className={`bg-gradient-to-br ${feature.color} p-6 rounded-3xl text-white mb-6 shadow-xl`}
+                    className={`bg-linear-to-br ${feature.color} p-6 rounded-3xl text-white mb-6 shadow-xl`}
                   >
                     {feature.icon}
                   </div>
@@ -298,7 +300,7 @@ const Home = () => {
                           alt={club.clubName}
                           className="w-full h-full object-cover"
                         />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+                        <div className="absolute inset-0 bg-linear-to-t from-black/60 to-transparent"></div>
                         <div className="absolute top-4 right-4">
                           <div className="badge badge-primary badge-lg font-bold shadow-2xl text-base px-4 py-3">
                             {club.category}
@@ -354,7 +356,7 @@ const Home = () => {
       </section>
 
       {/* Upcoming Events - Timeline Style */}
-      <section className="py-24 bg-gradient-to-b from-base-100 to-base-200">
+      <section className="py-24 bg-linear-to-b from-base-100 to-base-200">
         <div className="container mx-auto px-4">
           <div className="flex flex-col lg:flex-row justify-between items-center mb-16 gap-6">
             <motion.div

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from "react";
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
@@ -7,14 +7,16 @@ import {
   GoogleAuthProvider,
   signInWithPopup,
   updateProfile,
-} from 'firebase/auth';
-import { auth } from '../firebase/firebase.config';
-import api from '../utils/api';
-import { AuthContext } from './AuthContext';
+} from "firebase/auth";
+import { auth } from "../firebase/firebase.config";
+import api from "../utils/api";
+import toast from "react-hot-toast";
+import { AuthContext } from "./AuthContext";
 
 const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const isSavingUser = useRef(false);
 
   // Register user
   const createUser = async (email, password) => {
@@ -38,7 +40,7 @@ const AuthProvider = ({ children }) => {
   // Logout user
   const logOut = async () => {
     setLoading(true);
-    localStorage.removeItem('token');
+    localStorage.removeItem("token");
     return signOut(auth);
   };
 
@@ -50,34 +52,72 @@ const AuthProvider = ({ children }) => {
     });
   };
 
-  // Register user in backend
-  const registerUserInBackend = async (userData) => {
+  // Save user to database (can be called manually)
+  const saveUserToDatabase = async (userData) => {
+    // Prevent duplicate saves
+    if (isSavingUser.current) {
+      console.log("User save already in progress, skipping...");
+      return;
+    }
+
+    isSavingUser.current = true;
+
     try {
-      await api.post('/users/register', userData);
+      const response = await api.post("/users/register", userData);
+
+      if (response.data.success) {
+        //console.log("User saved to database successfully");
+
+        // Show welcome message for new users only
+        if (response.data.isNewUser) {
+          toast.success(`Welcome to ClubSphere, ${userData.name}!`, {
+            duration: 4000,
+            icon: "🎉",
+          });
+        }
+      }
+
+      return response.data;
     } catch (error) {
-      console.error('Error registering user in backend:', error);
+      console.error("Error saving user to database:", error);
+      // Don't throw error - allow user to continue
+      toast.error("Note: User profile may not be fully synced.");
+    } finally {
+      isSavingUser.current = false;
     }
   };
 
-  // Observer for auth state
+  // Observer for auth state (handles automatic login syncing)
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       if (currentUser) {
-        // Get Firebase token
-        const token = await currentUser.getIdToken();
-        localStorage.setItem('token', token);
+        try {
+          // Get Firebase token
+          const token = await currentUser.getIdToken();
+          localStorage.setItem("token", token);
 
-        // Register/update user in backend
-        await registerUserInBackend({
-          name: currentUser.displayName,
-          email: currentUser.email,
-          photoURL: currentUser.photoURL,
-        });
+          // Only auto-save for Google Sign-in (they have complete profile immediately)
+          // For email registration, we'll save manually after profile update
+          if (currentUser.displayName) {
+            await saveUserToDatabase({
+              name: currentUser.displayName,
+              email: currentUser.email,
+              photoURL:
+                currentUser.photoURL ||
+                `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                  currentUser.displayName
+                )}`,
+            });
+          }
 
-        setUser(currentUser);
+          setUser(currentUser);
+        } catch (error) {
+          console.error("Error in auth state change:", error);
+          setUser(currentUser);
+        }
       } else {
         setUser(null);
-        localStorage.removeItem('token');
+        localStorage.removeItem("token");
       }
       setLoading(false);
     });
@@ -93,6 +133,7 @@ const AuthProvider = ({ children }) => {
     googleSignIn,
     logOut,
     updateUserProfile,
+    saveUserToDatabase,
   };
 
   return (

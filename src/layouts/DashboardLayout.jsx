@@ -40,7 +40,7 @@ const DashboardLayout = () => {
       navigate("/");
       toast.success("Logged out successfully");
     } catch (error) {
-      error && toast.error("Error logging out");
+      toast.error("Error logging out");
     }
   };
 
@@ -136,7 +136,7 @@ const DashboardLayout = () => {
           </div>
         </div>
         {/* Page content */}
-        <div className="p-4 lg:p-8">
+        <div className="p-4 lg:p-8 bg-base-100 min-h-screen">
           <Outlet />
         </div>
       </div>

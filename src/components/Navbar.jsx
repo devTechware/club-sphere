@@ -100,6 +100,7 @@ const Navbar = () => {
                     <span className="font-bold text-sm">
                       {user?.displayName}
                     </span>
+                    <br />
                     <span className="text-xs text-gray-500">{user?.email}</span>
                   </div>
                 </li>
