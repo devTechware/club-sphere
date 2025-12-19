@@ -1,6 +1,9 @@
+import { useState } from "react";
 import { useParams, Link } from "react-router";
 import { motion } from "framer-motion";
 import { useClubDetails } from "../hooks/useClubs";
+import useAuth from "../hooks/useAuth";
+import PaymentModal from "../components/PaymentModal";
 import {
   FaUsers,
   FaMapMarkerAlt,
@@ -12,7 +15,9 @@ import {
 
 const ClubDetails = () => {
   const { id } = useParams();
+  const { user } = useAuth();
   const { data: club, isLoading, isError } = useClubDetails(id);
+  const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
 
   if (isLoading) {
     return (
@@ -34,6 +39,16 @@ const ClubDetails = () => {
       </div>
     );
   }
+
+  const handleJoinClick = () => {
+    if (!user) {
+      // Redirect to login if not logged in
+      window.location.href = `/login?redirect=/clubs/${id}`;
+    } else {
+      // Open payment modal if logged in
+      setIsPaymentModalOpen(true);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-base-100">
@@ -205,12 +220,12 @@ const ClubDetails = () => {
                 </div>
               </div>
 
-              <Link
-                to="/login"
+              <button
+                onClick={handleJoinClick}
                 className="btn btn-primary w-full btn-lg font-bold"
               >
-                Join Now
-              </Link>
+                {club.membershipFee > 0 ? "Join Now" : "Join Free"}
+              </button>
 
               <div className="divider">OR</div>
 
@@ -221,6 +236,17 @@ const ClubDetails = () => {
           </div>
         </div>
       </div>
+
+      {/* Payment Modal */}
+      <PaymentModal
+        isOpen={isPaymentModalOpen}
+        onClose={() => setIsPaymentModalOpen(false)}
+        type="club"
+        item={club}
+        onSuccess={() => {
+          // Optionally refresh data or redirect
+        }}
+      />
     </div>
   );
 };

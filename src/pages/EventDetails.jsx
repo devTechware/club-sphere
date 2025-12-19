@@ -1,6 +1,9 @@
+import { useState } from "react";
 import { useParams, Link } from "react-router";
 import { motion } from "framer-motion";
 import { useEventDetails } from "../hooks/useEvents";
+import useAuth from "../hooks/useAuth";
+import PaymentModal from "../components/PaymentModal";
 import {
   FaCalendar,
   FaMapMarkerAlt,
@@ -14,7 +17,9 @@ import {
 
 const EventDetails = () => {
   const { id } = useParams();
+  const { user } = useAuth();
   const { data: event, isLoading, isError } = useEventDetails(id);
+  const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
 
   if (isLoading) {
     return (
@@ -38,12 +43,20 @@ const EventDetails = () => {
   }
 
   const eventDate = new Date(event.eventDate);
-  console.log(eventDate);
-
   const isUpcoming = eventDate > new Date();
   const spotsLeft = event.maxAttendees
     ? event.maxAttendees - (event.registrationCount || 0)
     : null;
+
+  const handleRegisterClick = () => {
+    if (!user) {
+      // Redirect to login if not logged in
+      window.location.href = `/login?redirect=/events/${id}`;
+    } else {
+      // Open payment modal if logged in
+      setIsPaymentModalOpen(true);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-base-100">
@@ -299,12 +312,14 @@ const EventDetails = () => {
                     )}
                   </div>
 
-                  <Link
-                    to="/login"
+                  <button
+                    onClick={handleRegisterClick}
                     className="btn btn-secondary w-full btn-lg font-bold"
                   >
-                    Register Now
-                  </Link>
+                    {event.isPaid
+                      ? `Register - $${event.eventFee}`
+                      : "Register Free"}
+                  </button>
                 </>
               )}
 
@@ -317,6 +332,17 @@ const EventDetails = () => {
           </div>
         </div>
       </div>
+
+      {/* Payment Modal */}
+      <PaymentModal
+        isOpen={isPaymentModalOpen}
+        onClose={() => setIsPaymentModalOpen(false)}
+        type="event"
+        item={event}
+        onSuccess={() => {
+          // Optionally refresh data or redirect
+        }}
+      />
     </div>
   );
 };
