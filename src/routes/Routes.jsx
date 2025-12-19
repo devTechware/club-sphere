@@ -16,6 +16,9 @@ import MemberDashboard from "../pages/dashboard/MemberDashboard";
 import ManageUsers from "../pages/dashboard/ManageUsers";
 import ManageClubs from "../pages/dashboard/ManageClubs";
 import ManagePayments from "../pages/dashboard/ManagePayments";
+import MyClubs from "../pages/dashboard/MyClubs";
+import MyEvents from "../pages/dashboard/MyEvents";
+import MyPayments from "../pages/dashboard/MyPayments";
 
 const router = createBrowserRouter([
   {
@@ -61,6 +64,7 @@ const router = createBrowserRouter([
       </PrivateRoute>
     ),
     children: [
+      // Admin routes
       {
         path: "admin",
         element: <AdminDashboard />,
@@ -77,13 +81,27 @@ const router = createBrowserRouter([
         path: "admin/payments",
         element: <ManagePayments />,
       },
+      // Manager routes
       {
         path: "manager",
         element: <ManagerDashboard />,
       },
+      // Member routes
       {
         path: "member",
         element: <MemberDashboard />,
+      },
+      {
+        path: "member/clubs",
+        element: <MyClubs />,
+      },
+      {
+        path: "member/events",
+        element: <MyEvents />,
+      },
+      {
+        path: "member/payments",
+        element: <MyPayments />,
       },
     ],
   },

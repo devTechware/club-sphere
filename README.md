@@ -4,7 +4,7 @@ A modern, full-stack web application for managing clubs, events, and memberships
 
 ## 🌐 Live URL
 
-**Frontend:** [https://club-sphere.web.app](https://club-sphere.web.app)
+**Frontend:** [https://club-sphere-psi.vercel.app](https://club-sphere-psi.vercel.app)
 
 ---
 
@@ -298,7 +298,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 📧 Contact
 
-For questions or support, please email: your.email@example.com
+For questions or support, please email: rabinbd22@gmail.com
 
 ---
 
