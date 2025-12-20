@@ -1,17 +1,58 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { FaTimes, FaCheckCircle, FaCreditCard } from "react-icons/fa";
+import { FaTimes, FaCheckCircle } from "react-icons/fa";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { Elements } from "@stripe/react-stripe-js";
+import { loadStripe } from "@stripe/stripe-js";
 import api from "../utils/api";
 import toast from "react-hot-toast";
 import useAuth from "../hooks/useAuth";
+import StripePaymentForm from "./StripePaymentForm";
+
+const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
 
 const PaymentModal = ({ isOpen, onClose, type, item, onSuccess }) => {
   const { user } = useAuth();
   const queryClient = useQueryClient();
+  const [clientSecret, setClientSecret] = useState(null);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [isCreatingIntent, setIsCreatingIntent] = useState(false);
 
-  // Payment mutation
+  const amount = type === "club" ? item.membershipFee : item.eventFee;
+  const isFree = amount === 0;
+
+  // Create payment intent when modal opens
+  useEffect(() => {
+    if (isOpen && !isFree && !clientSecret) {
+      createPaymentIntent();
+    }
+  }, [isOpen, isFree]);
+
+  const createPaymentIntent = async () => {
+    setIsCreatingIntent(true);
+    try {
+      const endpoint =
+        type === "club"
+          ? "/stripe/create-payment-intent"
+          : "/stripe/create-event-payment-intent";
+
+      const payload =
+        type === "club"
+          ? { clubId: item._id, amount }
+          : { eventId: item._id, amount };
+
+      const response = await api.post(endpoint, payload);
+      setClientSecret(response.data.clientSecret);
+    } catch (error) {
+      console.error("Error creating payment intent:", error);
+      toast.error("Failed to initialize payment");
+      onClose();
+    } finally {
+      setIsCreatingIntent(false);
+    }
+  };
+
+  // Payment mutation for free items or after successful payment
   const paymentMutation = useMutation({
     mutationFn: async (paymentData) => {
       // Create membership or event registration
@@ -42,33 +83,50 @@ const PaymentModal = ({ isOpen, onClose, type, item, onSuccess }) => {
       onClose();
     },
     onError: (error) => {
-      toast.error(error.response?.data?.message || "Payment failed");
+      toast.error(error.response?.data?.message || "Operation failed");
       setIsProcessing(false);
     },
   });
 
-  const handlePayment = async (e) => {
-    e.preventDefault();
+  const handleFreeJoin = async () => {
     setIsProcessing(true);
+    const paymentData = {
+      type: type === "club" ? "membership" : "event",
+      amount: 0,
+      clubId: type === "club" ? item._id : item.clubId,
+      eventId: type === "event" ? item._id : undefined,
+      stripePaymentIntentId: `free_${Date.now()}`,
+    };
 
-    // Simulate payment processing (in real app, integrate Stripe/PayPal)
-    setTimeout(() => {
-      const paymentData = {
-        type: type === "club" ? "membership" : "event",
-        amount: type === "club" ? item.membershipFee : item.eventFee,
-        clubId: type === "club" ? item._id : item.clubId,
-        eventId: type === "event" ? item._id : undefined,
-        stripePaymentIntentId: `pi_${Math.random().toString(36).substr(2, 9)}`,
-      };
-
-      paymentMutation.mutate(paymentData);
-    }, 2000);
+    paymentMutation.mutate(paymentData);
   };
 
-  const amount = type === "club" ? item.membershipFee : item.eventFee;
-  const isFree = amount === 0;
+  const handlePaymentSuccess = (paymentIntent) => {
+    setIsProcessing(true);
+    const paymentData = {
+      type: type === "club" ? "membership" : "event",
+      amount,
+      clubId: type === "club" ? item._id : item.clubId,
+      eventId: type === "event" ? item._id : undefined,
+      stripePaymentIntentId: paymentIntent.id,
+    };
+
+    paymentMutation.mutate(paymentData);
+  };
+
+  const handlePaymentError = (error) => {
+    console.error("Payment error:", error);
+    toast.error(error.message || "Payment failed");
+  };
 
   if (!isOpen) return null;
+
+  const appearance = {
+    theme: "stripe",
+    variables: {
+      colorPrimary: "#ff6b6b",
+    },
+  };
 
   return (
     <AnimatePresence>
@@ -80,7 +138,7 @@ const PaymentModal = ({ isOpen, onClose, type, item, onSuccess }) => {
           className="bg-white rounded-2xl shadow-2xl max-w-md w-full max-h-[90vh] overflow-y-auto"
         >
           {/* Header */}
-          <div className="bg-linear-to-r from-primary to-secondary p-6 text-white">
+          <div className="bg-gradient-to-r from-primary to-secondary p-6 text-white">
             <div className="flex justify-between items-start">
               <div>
                 <h2 className="text-2xl font-black mb-2">
@@ -146,76 +204,10 @@ const PaymentModal = ({ isOpen, onClose, type, item, onSuccess }) => {
               )}
             </div>
 
-            {/* Payment Form (only if not free) */}
-            {!isFree && (
-              <form onSubmit={handlePayment} className="space-y-4">
-                <div>
-                  <label className="label">
-                    <span className="label-text font-bold flex items-center gap-2">
-                      <FaCreditCard className="text-primary" />
-                      Card Number
-                    </span>
-                  </label>
-                  <input
-                    type="text"
-                    placeholder="1234 5678 9012 3456"
-                    className="input input-bordered w-full"
-                    required
-                    maxLength="19"
-                  />
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="label">
-                      <span className="label-text font-bold">Expiry</span>
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="MM/YY"
-                      className="input input-bordered w-full"
-                      required
-                      maxLength="5"
-                    />
-                  </div>
-                  <div>
-                    <label className="label">
-                      <span className="label-text font-bold">CVV</span>
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="123"
-                      className="input input-bordered w-full"
-                      required
-                      maxLength="3"
-                    />
-                  </div>
-                </div>
-
-                <button
-                  type="submit"
-                  disabled={isProcessing}
-                  className="btn btn-primary w-full btn-lg font-bold"
-                >
-                  {isProcessing ? (
-                    <>
-                      <span className="loading loading-spinner"></span>
-                      Processing...
-                    </>
-                  ) : (
-                    <>
-                      <FaCheckCircle />
-                      Pay ${amount}
-                    </>
-                  )}
-                </button>
-              </form>
-            )}
-
-            {/* Free Join/Register */}
-            {isFree && (
+            {/* Payment Form or Free Join */}
+            {isFree ? (
               <button
-                onClick={handlePayment}
+                onClick={handleFreeJoin}
                 disabled={isProcessing}
                 className="btn btn-primary w-full btn-lg font-bold"
               >
@@ -231,15 +223,22 @@ const PaymentModal = ({ isOpen, onClose, type, item, onSuccess }) => {
                   </>
                 )}
               </button>
-            )}
-
-            {/* Security Notice */}
-            <div className="mt-6 text-center text-sm text-gray-500">
-              <p>🔒 Secure payment processing</p>
-              <p className="text-xs mt-1">
-                Your payment information is encrypted
-              </p>
-            </div>
+            ) : isCreatingIntent ? (
+              <div className="flex justify-center py-8">
+                <span className="loading loading-spinner loading-lg text-primary"></span>
+              </div>
+            ) : clientSecret ? (
+              <Elements
+                stripe={stripePromise}
+                options={{ clientSecret, appearance }}
+              >
+                <StripePaymentForm
+                  amount={amount}
+                  onSuccess={handlePaymentSuccess}
+                  onError={handlePaymentError}
+                />
+              </Elements>
+            ) : null}
           </div>
         </motion.div>
       </div>
