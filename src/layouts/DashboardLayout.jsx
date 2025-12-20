@@ -1,4 +1,4 @@
-import { Outlet, Link, Navigate } from "react-router";
+import { Outlet, Link, Navigate, useLocation } from "react-router";
 import { useQuery } from "@tanstack/react-query";
 import useAuth from "../hooks/useAuth";
 import api from "../utils/api";
@@ -14,35 +14,68 @@ import {
 
 const DashboardLayout = () => {
   const { user, logOut } = useAuth();
+  const location = useLocation();
 
-  // Fetch user profile to get role
-  const { data: profile, isLoading } = useQuery({
-    queryKey: ["userProfile"],
+  // Fetch user profile to get role - always fresh data
+  const {
+    data: profile,
+    isLoading,
+    isError,
+  } = useQuery({
+    queryKey: ["userProfile", user?.email],
     queryFn: async () => {
       const response = await api.get("/users/profile");
       return response.data;
     },
+    enabled: !!user,
+    staleTime: 0, // Always fetch fresh data
+    cacheTime: 0, // Don't cache
   });
 
   if (isLoading) {
     return (
       <div className="flex justify-center items-center min-h-screen">
-        <span className="loading loading-spinner loading-lg text-primary"></span>
+        <div className="text-center">
+          <span className="loading loading-spinner loading-lg text-primary"></span>
+          <p className="mt-4 font-semibold">Loading dashboard...</p>
+        </div>
       </div>
     );
   }
 
-  if (!profile) {
-    return <Navigate to="/login" />;
+  if (!profile || isError) {
+    return <Navigate to="/login" replace />;
   }
 
   // Redirect to appropriate dashboard based on role
-  const currentPath = window.location.pathname;
+  const currentPath = location.pathname;
+
+  // If user is on /dashboard or /dashboard/, redirect to role-specific dashboard
   if (currentPath === "/dashboard" || currentPath === "/dashboard/") {
-    if (profile.role === "admin") return <Navigate to="/dashboard/admin" />;
-    if (profile.role === "clubManager")
-      return <Navigate to="/dashboard/manager" />;
-    return <Navigate to="/dashboard/member" />;
+    if (profile.role === "admin") {
+      return <Navigate to="/dashboard/admin" replace />;
+    }
+    if (profile.role === "clubManager") {
+      return <Navigate to="/dashboard/manager" replace />;
+    }
+    return <Navigate to="/dashboard/member" replace />;
+  }
+
+  // Prevent role confusion - redirect to correct dashboard if user accesses wrong one
+  if (profile.role === "admin" && !currentPath.startsWith("/dashboard/admin")) {
+    return <Navigate to="/dashboard/admin" replace />;
+  }
+  if (
+    profile.role === "clubManager" &&
+    !currentPath.startsWith("/dashboard/manager")
+  ) {
+    return <Navigate to="/dashboard/manager" replace />;
+  }
+  if (
+    profile.role === "member" &&
+    !currentPath.startsWith("/dashboard/member")
+  ) {
+    return <Navigate to="/dashboard/member" replace />;
   }
 
   const handleLogout = async () => {
@@ -164,14 +197,14 @@ const DashboardLayout = () => {
         <div className="menu p-4 w-80 min-h-full bg-white border-r-2 border-base-200">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-3 px-4 py-6 mb-4">
-            <div className="w-10 h-10 rounded-full bg-linear-to-br from-primary to-secondary flex items-center justify-center">
+            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center">
               <span className="text-white font-black text-xl">C</span>
             </div>
             <span className="text-2xl font-black">ClubSphere</span>
           </Link>
 
           {/* User Info */}
-          <div className="bg-linear-to-r from-primary/10 to-secondary/10 rounded-2xl p-4 mb-6">
+          <div className="bg-gradient-to-r from-primary/10 to-secondary/10 rounded-2xl p-4 mb-6">
             <div className="flex items-center gap-3 mb-2">
               <div className="avatar">
                 <div className="w-12 rounded-full ring ring-primary ring-offset-2">
@@ -205,7 +238,11 @@ const DashboardLayout = () => {
               <li key={item.path}>
                 <Link
                   to={item.path}
-                  className="flex items-center gap-3 px-4 py-3 rounded-xl font-semibold hover:bg-primary hover:text-white transition-all"
+                  className={`flex items-center gap-3 px-4 py-3 rounded-xl font-semibold transition-all ${
+                    location.pathname === item.path
+                      ? "bg-primary text-white"
+                      : "hover:bg-primary hover:text-white"
+                  }`}
                 >
                   <span className="text-xl">{item.icon}</span>
                   {item.label}

@@ -9,11 +9,11 @@ import router from "./routes/Routes";
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
-    <AuthProvider>
-      <QueryProvider>
+    <QueryProvider>
+      <AuthProvider>
         <RouterProvider router={router} />
         <Toaster position="top-right" />
-      </QueryProvider>
-    </AuthProvider>
+      </AuthProvider>
+    </QueryProvider>
   </StrictMode>
 );

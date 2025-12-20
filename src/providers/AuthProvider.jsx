@@ -9,6 +9,7 @@ import {
   updateProfile,
 } from "firebase/auth";
 import { auth } from "../firebase/firebase.config";
+import { useQueryClient } from "@tanstack/react-query";
 import api from "../utils/api";
 import toast from "react-hot-toast";
 import { AuthContext } from "./AuthContext";
@@ -17,6 +18,7 @@ const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const isSavingUser = useRef(false);
+  const queryClient = useQueryClient();
 
   // Register user
   const createUser = async (email, password) => {
@@ -27,12 +29,16 @@ const AuthProvider = ({ children }) => {
   // Login user
   const signIn = async (email, password) => {
     setLoading(true);
+    // Clear all cached data before login
+    queryClient.clear();
     return signInWithEmailAndPassword(auth, email, password);
   };
 
   // Google login
   const googleSignIn = async () => {
     setLoading(true);
+    // Clear all cached data before login
+    queryClient.clear();
     const provider = new GoogleAuthProvider();
     return signInWithPopup(auth, provider);
   };
@@ -41,6 +47,8 @@ const AuthProvider = ({ children }) => {
   const logOut = async () => {
     setLoading(true);
     localStorage.removeItem("token");
+    // Clear all cached data on logout
+    queryClient.clear();
     return signOut(auth);
   };
 
@@ -66,7 +74,10 @@ const AuthProvider = ({ children }) => {
       const response = await api.post("/users/register", userData);
 
       if (response.data.success) {
-        //console.log("User saved to database successfully");
+        console.log("User saved to database successfully");
+
+        // Invalidate user profile cache to force refresh
+        queryClient.invalidateQueries(["userProfile"]);
 
         // Show welcome message for new users only
         if (response.data.isNewUser) {
@@ -118,12 +129,14 @@ const AuthProvider = ({ children }) => {
       } else {
         setUser(null);
         localStorage.removeItem("token");
+        // Clear cache when user logs out
+        queryClient.clear();
       }
       setLoading(false);
     });
 
     return () => unsubscribe();
-  }, []);
+  }, [queryClient]);
 
   const authInfo = {
     user,

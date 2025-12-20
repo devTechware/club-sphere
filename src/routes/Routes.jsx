@@ -10,15 +10,18 @@ import Events from "../pages/Events";
 import EventDetails from "../pages/EventDetails";
 import PrivateRoute from "../components/PrivateRoute";
 import DashboardLayout from "../layouts/DashboardLayout";
-import AdminDashboard from "../pages/dashboard/AdminDashboard";
-import ManagerDashboard from "../pages/dashboard/ManagerDashboard";
-import MemberDashboard from "../pages/dashboard/MemberDashboard";
-import ManageUsers from "../pages/dashboard/ManageUsers";
-import ManageClubs from "../pages/dashboard/ManageClubs";
-import ManagePayments from "../pages/dashboard/ManagePayments";
-import MyClubs from "../pages/dashboard/MyClubs";
-import MyEvents from "../pages/dashboard/MyEvents";
-import MyPayments from "../pages/dashboard/MyPayments";
+import AdminDashboard from "../pages/dashboard/admin/AdminDashboard";
+import ManagerDashboard from "../pages/dashboard/manager/ManagerDashboard";
+import MemberDashboard from "../pages/dashboard/member/MemberDashboard";
+import ManageUsers from "../pages/dashboard/admin/ManageUsers";
+import ManageClubs from "../pages/dashboard/admin/ManageClubs";
+import ManagePayments from "../pages/dashboard/admin/ManagePayments";
+import MyClubs from "../pages/dashboard/member/MyClubs";
+import MyEvents from "../pages/dashboard/member/MyEvents";
+import MyPayments from "../pages/dashboard/member/MyPayments";
+import ManagerMyClubs from "../pages/dashboard/manager/MyClubs";
+import ManagerMyEvents from "../pages/dashboard/manager/MyEvents";
+import MyMembers from "../pages/dashboard/manager/MyMembers";
 
 const router = createBrowserRouter([
   {
@@ -85,6 +88,18 @@ const router = createBrowserRouter([
       {
         path: "manager",
         element: <ManagerDashboard />,
+      },
+      {
+        path: "manager/clubs",
+        element: <ManagerMyClubs />,
+      },
+      {
+        path: "manager/events",
+        element: <ManagerMyEvents />,
+      },
+      {
+        path: "manager/members",
+        element: <MyMembers />,
       },
       // Member routes
       {

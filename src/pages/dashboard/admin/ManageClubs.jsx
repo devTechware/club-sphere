@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { motion } from "framer-motion";
-import api from "../../utils/api";
+import api from "../../../utils/api";
 import toast from "react-hot-toast";
 import {
   FaBuilding,

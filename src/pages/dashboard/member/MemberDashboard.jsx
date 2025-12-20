@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { useMemberStats } from "../../hooks/useDashboard";
+import { useMemberStats } from "../../../hooks/useDashboard";
 import {
   FaBuilding,
   FaCalendar,

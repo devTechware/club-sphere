@@ -13,8 +13,7 @@ const Login = () => {
 
   // Get redirect URL from query params or state
   const searchParams = new URLSearchParams(location.search);
-  const redirectUrl =
-    searchParams.get("redirect") || location.state?.from?.pathname || "/";
+  const redirectUrl = searchParams.get("redirect") || "/dashboard";
 
   const {
     register,
@@ -34,6 +33,7 @@ const Login = () => {
           fontWeight: "600",
         },
       });
+      // Navigate to dashboard (will auto-redirect to role-specific dashboard)
       navigate(redirectUrl, { replace: true });
     } catch (error) {
       toast.error(error.message || "Login failed");
@@ -52,6 +52,7 @@ const Login = () => {
           fontWeight: "600",
         },
       });
+      // Navigate to dashboard (will auto-redirect to role-specific dashboard)
       navigate(redirectUrl, { replace: true });
     } catch (error) {
       toast.error(error.message || "Google login failed");
@@ -59,7 +60,7 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-primary/10 via-secondary/10 to-accent/10 px-4 py-12">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/10 via-secondary/10 to-accent/10 px-4 py-12">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -69,7 +70,7 @@ const Login = () => {
         <div className="card-body p-8">
           {/* Logo */}
           <div className="flex justify-center mb-6">
-            <div className="bg-linear-to-br from-primary to-secondary p-4 rounded-2xl">
+            <div className="bg-gradient-to-br from-primary to-secondary p-4 rounded-2xl">
               <FaRocket className="text-4xl text-white" />
             </div>
           </div>

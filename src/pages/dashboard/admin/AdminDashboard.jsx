@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { useAdminStats } from "../../hooks/useDashboard";
+import { useAdminStats } from "../../../hooks/useDashboard";
 import { Link } from "react-router";
 import {
   FaUsers,

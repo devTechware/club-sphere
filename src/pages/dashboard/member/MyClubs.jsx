@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import { Link } from "react-router";
-import api from "../../utils/api";
+import api from "../../../utils/api";
 import {
   FaBuilding,
   FaUsers,

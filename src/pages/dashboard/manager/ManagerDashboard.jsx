@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { useManagerStats } from "../../hooks/useDashboard";
+import { useManagerStats } from "../../../hooks/useDashboard";
 import {
   FaBuilding,
   FaUsers,
