@@ -19,14 +19,14 @@ const Footer = () => {
   ];
 
   return (
-    <footer className="bg-linear-to-r from-neutral to-neutral/90 text-white mt-20">
+    <footer className="bg-gradient-to-r from-neutral to-neutral/90 text-white mt-20">
       <div className="container mx-auto px-4 py-12">
         {/* Main Footer Content - 5 Columns */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 mb-8">
           {/* Column 1: Brand/Logo */}
           <div>
             <div className="flex items-center gap-2 mb-4">
-              <div className="bg-linear-to-br from-primary to-secondary p-2 rounded-lg">
+              <div className="bg-gradient-to-br from-primary to-secondary p-2 rounded-lg">
                 <FaRocket className="text-xl text-white" />
               </div>
               <h2 className="text-xl font-black">

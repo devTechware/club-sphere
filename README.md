@@ -129,6 +129,9 @@ VITE_APPID=your_app_id
 
 # Backend API
 VITE_API_URL=http://localhost:5000/api
+
+# Stripe Configuration
+VITE_STRIPE_PUBLISHABLE_KEY=your_stripe_publishable_key
 ```
 
 ### Installation Steps
@@ -157,52 +160,77 @@ npm run preview
 
 ```
 club-sphere/
+├── node_modules            # (not in git)
+├── public/                 # Static assets
 ├── src/
+│   ├── assets/
 │   ├── components/           # Reusable UI components
-│   │   ├── Navbar.jsx
+│   │   ├── CreateClubModal.jsx
+│   │   ├── CreateEventModal.jsx
 │   │   ├── Footer.jsx
+│   │   ├── Navbar.jsx
+│   │   ├── PaymentModal.jsx
 │   │   └── PrivateRoute.jsx
-│   ├── pages/               # Page components
-│   │   ├── Home.jsx
-│   │   ├── Clubs.jsx
-│   │   ├── ClubDetails.jsx
-│   │   ├── Events.jsx
-│   │   ├── EventDetails.jsx
-│   │   ├── Login.jsx
-│   │   ├── Register.jsx
-│   │   ├── ErrorPage.jsx
-│   │   └── dashboard/       # Dashboard pages
-│   │       ├── AdminDashboard.jsx
-│   │       ├── ManagerDashboard.jsx
-│   │       ├── MemberDashboard.jsx
-│   │       ├── ManageUsers.jsx
-│   │       ├── ManageClubs.jsx
-│   │       └── ManagePayments.jsx
-│   ├── layouts/             # Layout components
-│   │   ├── MainLayout.jsx
-│   │   └── DashboardLayout.jsx
-│   ├── providers/           # Context providers
-│   │   ├── AuthProvider.jsx
-│   │   └── QueryProvider.jsx
+│   │   ├── StripePaymentForm.jsx
+│   ├── firebase/            # Firebase configuration
+│   │   └── firebase.config.js
 │   ├── hooks/               # Custom React hooks
 │   │   ├── useAuth.js
 │   │   ├── useClubs.js
-│   │   ├── useEvents.js
 │   │   └── useDashboard.js
+│   │   ├── useEvents.js
+│   ├── layouts/             # Layout components
+│   │   ├── MainLayout.jsx
+│   │   └── DashboardLayout.jsx
+│   ├── pages/               # Page components
+│   │   ├── dashboard/
+|   |   |   ├── admin/
+|   |   |   |  ├── AdminDashboard.jsx
+|   |   |   |  ├── ManageClubs.jsx
+|   |   |   |  ├── ManagePayments.jsx
+|   |   |   |  ├── ManageUsers.jsx
+|   |   |   ├── manager/
+|   |   |   |  ├── ManagerDashboard.jsx
+|   |   |   |  ├── MyClubs.jsx
+|   |   |   |  ├── MayEvents.jsx
+|   |   |   |  ├── MyMembers.jsx
+|   |   |   ├── member/
+|   |   |   |  ├── MemberDashboard.jsx
+|   |   |   |  ├── MyClubs.jsx
+|   |   |   |  ├── MyEvents.jsx
+|   |   |   |  ├── MyPayments.jsx
+│   │   ├── About.jsx
+│   │   ├── ClubDetails.jsx
+│   │   ├── Clubs.jsx
+│   │   ├── Contact.jsx
+│   │   ├── ErrorPage.jsx
+│   │   ├── EventDetails.jsx
+│   │   ├── Events.jsx
+│   │   ├── Home.jsx
+│   │   ├── Login.jsx
+│   │   ├── Privacy.jsx
+│   │   ├── Register.jsx
+│   │   ├── Sitemap.jsx
+│   │   ├── Terms.jsx
+│   ├── providers/           # Context providers
+│   │   ├── AuthContext.jsx
+│   │   ├── AuthProvider.jsx
+│   │   └── QueryProvider.jsx
+│   │   └── StripeProvider.jsx
 │   ├── routes/              # Route configuration
 │   │   └── Routes.jsx
 │   ├── utils/               # Utility functions
 │   │   └── api.js
-│   ├── firebase/            # Firebase configuration
-│   │   └── firebase.config.js
 │   ├── index.css           # Global styles and theme
 │   └── main.jsx            # Application entry point
-├── public/                 # Static assets
-├── .env.local             # Environment variables (not in git)
+├── .env                    # Environment variables (not in git)
+├── .gitignore
+├── .eslint.config.js
+├── index.html
+├── package-lock.json
 ├── package.json
-├── tailwind.config.js
-├── vite.config.js
-└── README.md
+├── README.md
+└── vite.config.js
 ```
 
 ---

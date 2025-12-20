@@ -8,6 +8,11 @@ import Clubs from "../pages/Clubs";
 import ClubDetails from "../pages/ClubDetails";
 import Events from "../pages/Events";
 import EventDetails from "../pages/EventDetails";
+import About from "../pages/About";
+import Contact from "../pages/Contact";
+import Terms from "../pages/Terms";
+import Privacy from "../pages/Privacy";
+import Sitemap from "../pages/Sitemap";
 import PrivateRoute from "../components/PrivateRoute";
 import DashboardLayout from "../layouts/DashboardLayout";
 import AdminDashboard from "../pages/dashboard/admin/AdminDashboard";
@@ -48,6 +53,26 @@ const router = createBrowserRouter([
       {
         path: "/events/:id",
         element: <EventDetails />,
+      },
+      {
+        path: "/about",
+        element: <About />,
+      },
+      {
+        path: "/contact",
+        element: <Contact />,
+      },
+      {
+        path: "/terms",
+        element: <Terms />,
+      },
+      {
+        path: "/privacy",
+        element: <Privacy />,
+      },
+      {
+        path: "/sitemap",
+        element: <Sitemap />,
       },
       {
         path: "/login",

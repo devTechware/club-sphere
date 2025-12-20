@@ -1,6 +1,8 @@
 import { Link, NavLink } from "react-router";
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import useAuth from "../hooks/useAuth";
+import api from "../utils/api";
 import toast from "react-hot-toast";
 import { FaRocket, FaTachometerAlt, FaSignOutAlt } from "react-icons/fa";
 import { motion } from "framer-motion";
@@ -8,6 +10,23 @@ import { motion } from "framer-motion";
 const Navbar = () => {
   const { user, logOut } = useAuth();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+  // Fetch user profile to get role
+  const { data: profile } = useQuery({
+    queryKey: ["userProfile"],
+    queryFn: async () => {
+      const response = await api.get("/users/profile");
+      return response.data;
+    },
+    enabled: !!user,
+  });
+
+  const getDashboardLink = () => {
+    if (!profile) return "/dashboard";
+    if (profile.role === "admin") return "/dashboard/admin";
+    if (profile.role === "clubManager") return "/dashboard/manager";
+    return "/dashboard/member";
+  };
 
   const handleLogout = async () => {
     try {
@@ -22,6 +41,8 @@ const Navbar = () => {
     { to: "/", label: "Home" },
     { to: "/clubs", label: "Clubs" },
     { to: "/events", label: "Events" },
+    { to: "/about", label: "About" },
+    { to: "/contact", label: "Contact" },
   ];
 
   return (
@@ -40,7 +61,7 @@ const Navbar = () => {
           >
             <motion.div
               whileHover={{ rotate: 15 }}
-              className="bg-linear-to-br from-primary to-secondary p-2 rounded-lg"
+              className="bg-gradient-to-br from-primary to-secondary p-2 rounded-lg"
             >
               <FaRocket className="text-white text-xl" />
             </motion.div>
@@ -93,7 +114,7 @@ const Navbar = () => {
               </div>
               <ul
                 tabIndex={0}
-                className="menu menu-sm dropdown-content bg-base-100 rounded-box z-1 mt-3 w-56 p-2 shadow-xl border border-base-200"
+                className="menu menu-sm dropdown-content bg-base-100 rounded-box z-[1] mt-3 w-56 p-2 shadow-xl border border-base-200"
               >
                 <li className="menu-title px-4 py-2">
                   <div>
@@ -107,7 +128,7 @@ const Navbar = () => {
                 <div className="divider my-1"></div>
                 <li>
                   <Link
-                    to="/dashboard/member"
+                    to={getDashboardLink()}
                     className="flex items-center gap-2"
                   >
                     <FaTachometerAlt />
@@ -130,7 +151,10 @@ const Navbar = () => {
               <Link to="/login" className="btn btn-ghost font-semibold">
                 Login
               </Link>
-              <Link to="/register" className="btn btn-primary font-semibold">
+              <Link
+                to="/register"
+                className="btn btn-primary font-semibold text-white"
+              >
                 Sign Up
               </Link>
             </div>
@@ -162,7 +186,7 @@ const Navbar = () => {
             {isMenuOpen && (
               <ul
                 tabIndex={0}
-                className="menu menu-sm dropdown-content bg-base-100 rounded-box z-1 mt-3 w-52 p-2 shadow-xl border border-base-200"
+                className="menu menu-sm dropdown-content bg-base-100 rounded-box z-[1] mt-3 w-52 p-2 shadow-xl border border-base-200"
               >
                 {navLinks.map((link) => (
                   <li key={link.to}>
