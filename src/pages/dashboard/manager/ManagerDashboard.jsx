@@ -1,5 +1,9 @@
+import { useState } from "react";
 import { motion } from "framer-motion";
+import { Link } from "react-router";
 import { useManagerStats } from "../../../hooks/useDashboard";
+import CreateClubModal from "../../../components/CreateClubModal";
+import CreateEventModal from "../../../components/CreateEventModal";
 import {
   FaBuilding,
   FaUsers,
@@ -7,10 +11,13 @@ import {
   FaDollarSign,
   FaChartBar,
   FaTrophy,
+  FaPlus,
 } from "react-icons/fa";
 
 const ManagerDashboard = () => {
   const { data: stats, isLoading } = useManagerStats();
+  const [isClubModalOpen, setIsClubModalOpen] = useState(false);
+  const [isEventModalOpen, setIsEventModalOpen] = useState(false);
 
   if (isLoading) {
     return (
@@ -140,7 +147,7 @@ const ManagerDashboard = () => {
               </thead>
               <tbody>
                 {stats?.members?.byClub && stats.members.byClub.length > 0 ? (
-                  stats.members.byClub.map((club, index) => (
+                  stats.members.byClub.map((club) => (
                     <tr key={club.clubId} className="hover:bg-base-200">
                       <td className="font-semibold">{club.clubName}</td>
                       <td>
@@ -188,18 +195,40 @@ const ManagerDashboard = () => {
             Quick Actions
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <button className="btn btn-lg bg-white text-secondary hover:bg-white/90 font-bold">
+            <button
+              onClick={() => setIsClubModalOpen(true)}
+              className="btn btn-lg bg-white text-secondary hover:bg-white/90 font-bold gap-2"
+            >
+              <FaPlus />
               Create New Club
             </button>
-            <button className="btn btn-lg bg-white text-secondary hover:bg-white/90 font-bold">
+            <button
+              onClick={() => setIsEventModalOpen(true)}
+              className="btn btn-lg bg-white text-secondary hover:bg-white/90 font-bold gap-2"
+            >
+              <FaPlus />
               Create Event
             </button>
-            <button className="btn btn-lg bg-white text-secondary hover:bg-white/90 font-bold">
+            <Link
+              to="/dashboard/manager/members"
+              className="btn btn-lg bg-white text-secondary hover:bg-white/90 font-bold gap-2"
+            >
+              <FaUsers />
               View Members
-            </button>
+            </Link>
           </div>
         </div>
       </motion.div>
+
+      {/* Modals */}
+      <CreateClubModal
+        isOpen={isClubModalOpen}
+        onClose={() => setIsClubModalOpen(false)}
+      />
+      <CreateEventModal
+        isOpen={isEventModalOpen}
+        onClose={() => setIsEventModalOpen(false)}
+      />
     </div>
   );
 };
