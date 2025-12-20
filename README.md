@@ -18,6 +18,14 @@ ClubSphere is designed to streamline club and event management for universities,
 
 ---
 
+## 🔑 Admin Credentials
+
+**Admin Account:**
+- Email: `admin@clubsphere.com`
+- Password: `******`
+
+---
+
 ## ✨ Key Features
 
 ### 🎯 Core Functionality
@@ -170,15 +178,15 @@ club-sphere/
 │   │   ├── Footer.jsx
 │   │   ├── Navbar.jsx
 │   │   ├── PaymentModal.jsx
-│   │   └── PrivateRoute.jsx
-│   │   ├── StripePaymentForm.jsx
+│   │   ├── PrivateRoute.jsx
+│   │   └── StripePaymentForm.jsx
 │   ├── firebase/            # Firebase configuration
 │   │   └── firebase.config.js
 │   ├── hooks/               # Custom React hooks
 │   │   ├── useAuth.js
 │   │   ├── useClubs.js
-│   │   └── useDashboard.js
-│   │   ├── useEvents.js
+│   │   ├── useDashboard.js
+│   │   └── useEvents.js
 │   ├── layouts/             # Layout components
 │   │   ├── MainLayout.jsx
 │   │   └── DashboardLayout.jsx
@@ -188,17 +196,17 @@ club-sphere/
 |   |   |   |  ├── AdminDashboard.jsx
 |   |   |   |  ├── ManageClubs.jsx
 |   |   |   |  ├── ManagePayments.jsx
-|   |   |   |  ├── ManageUsers.jsx
+|   |   |   |  └── ManageUsers.jsx
 |   |   |   ├── manager/
 |   |   |   |  ├── ManagerDashboard.jsx
 |   |   |   |  ├── MyClubs.jsx
 |   |   |   |  ├── MayEvents.jsx
-|   |   |   |  ├── MyMembers.jsx
+|   |   |   |  └── MyMembers.jsx
 |   |   |   ├── member/
 |   |   |   |  ├── MemberDashboard.jsx
 |   |   |   |  ├── MyClubs.jsx
 |   |   |   |  ├── MyEvents.jsx
-|   |   |   |  ├── MyPayments.jsx
+|   |   |   |  └── MyPayments.jsx
 │   │   ├── About.jsx
 │   │   ├── ClubDetails.jsx
 │   │   ├── Clubs.jsx
@@ -211,7 +219,7 @@ club-sphere/
 │   │   ├── Privacy.jsx
 │   │   ├── Register.jsx
 │   │   ├── Sitemap.jsx
-│   │   ├── Terms.jsx
+│   │   └── Terms.jsx
 │   ├── providers/           # Context providers
 │   │   ├── AuthContext.jsx
 │   │   ├── AuthProvider.jsx
@@ -225,7 +233,7 @@ club-sphere/
 │   └── main.jsx            # Application entry point
 ├── .env                    # Environment variables (not in git)
 ├── .gitignore
-├── .eslint.config.js
+├── eslint.config.js
 ├── index.html
 ├── package-lock.json
 ├── package.json
@@ -263,12 +271,19 @@ club-sphere/
 - ✅ Role-based access control
 - ✅ XSS protection through React's built-in escaping
 - ✅ CORS configuration for API security
+- ✅ Stripe payment security (test mode)
 
 ---
 
 ## 🚀 Deployment
 
-### Frontend (Firebase Hosting)
+### Frontend (Vercel)
+The project is deployed on Vercel. Any push to the main branch triggers automatic deployment.
+
+### Backend
+Backend API is deployed separately. See backend repository for details.
+
+---
 
 ```bash
 npm run build
@@ -284,6 +299,16 @@ firebase deploy
 - **Caching:** TanStack Query with 5-minute stale time
 - **Minification:** Production builds optimized with Vite
 - **Tree Shaking:** Unused code eliminated in production
+
+---
+
+## 🎨 Challenge Features Implemented
+
+1. ✅ **Search & Filter:** Server-side search and category filtering
+2. ✅ **Token Verification:** Firebase token verification on backend
+3. ✅ **Sorting:** Sort clubs and events by multiple criteria
+4. ✅ **React Hook Form:** Used in all forms with validation
+5. ✅ **TanStack Query:** Proper useQuery and useMutation implementation
 
 ---
 
@@ -317,8 +342,9 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 🙏 Acknowledgments
 
 - Firebase for authentication services
-- MongoDB for database hosting
-- Unsplash for placeholder images
+- MongoDB Atlas for database hosting
+- Stripe for payment processing
+- Vercel for hosting
 - DaisyUI for component library
 - React community for amazing tools and libraries
 
