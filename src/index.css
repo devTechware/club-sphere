@@ -4,6 +4,7 @@
   themes: [light, dark];
 }
 
+/* Light Theme (Default) */
 @plugin "daisyui/theme" {
   name: "clubsphere";
   default: true;
@@ -51,13 +52,60 @@
   --tab-radius: 0.75rem;
 }
 
-/* Custom scrollbar - Coral theme */
+/* Dark Theme */
+@plugin "daisyui/theme" {
+  name: "clubsphere-dark";
+
+  /* Same vibrant colors but adjusted for dark mode */
+  --color-primary: #ff6b6b;
+  --color-primary-content: #ffffff;
+
+  --color-secondary: #4ecdc4;
+  --color-secondary-content: #ffffff;
+
+  --color-accent: #ffe66d;
+  --color-accent-content: #1a1a1a;
+
+  --color-neutral: #1a1d24; /* Darker neutral */
+  --color-neutral-content: #e5e7eb;
+
+  --color-base-100: #1f2937; /* Dark gray */
+  --color-base-200: #111827; /* Darker */
+  --color-base-300: #0f172a; /* Darkest */
+  --color-base-content: #f3f4f6; /* Light text */
+
+  --color-info: #60a5fa;
+  --color-info-content: #ffffff;
+
+  --color-success: #34d399;
+  --color-success-content: #ffffff;
+
+  --color-warning: #fbbf24;
+  --color-warning-content: #1a1a1a;
+
+  --color-error: #f87171;
+  --color-error-content: #ffffff;
+
+  --rounded-box: 1.5rem;
+  --rounded-btn: 0.75rem;
+  --rounded-badge: 2rem;
+
+  --animation-btn: 0.25s;
+  --animation-input: 0.2s;
+
+  --btn-focus-scale: 0.97;
+  --border-btn: 2px;
+  --tab-border: 2px;
+  --tab-radius: 0.75rem;
+}
+
+/* Custom scrollbar - Light theme */
 ::-webkit-scrollbar {
   width: 12px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #faf9f7;
+  @apply bg-base-200;
 }
 
 ::-webkit-scrollbar-thumb {
@@ -67,6 +115,11 @@
 
 ::-webkit-scrollbar-thumb:hover {
   background: linear-gradient(180deg, #ee5a52 0%, #45b8af 100%);
+}
+
+/* Dark mode scrollbar */
+[data-theme="dark"] ::-webkit-scrollbar-track {
+  @apply bg-base-300;
 }
 
 /* Smooth animations */
@@ -128,6 +181,12 @@
   box-shadow: 0 20px 40px -10px rgba(255, 107, 107, 0.3),
     0 10px 20px -5px rgba(78, 205, 196, 0.2);
   border-color: #ff6b6b;
+}
+
+/* Dark mode card hover */
+[data-theme="dark"] .card-hover:hover {
+  box-shadow: 0 20px 40px -10px rgba(255, 107, 107, 0.5),
+    0 10px 20px -5px rgba(78, 205, 196, 0.4);
 }
 
 /* Glowing text gradient */
@@ -225,12 +284,23 @@
   }
 }
 
+/* Dark mode glow */
+[data-theme="dark"] .badge-glow {
+  box-shadow: 0 0 25px rgba(255, 107, 107, 0.7);
+}
+
 /* Glassmorphism effect */
 .glass {
   background: rgba(255, 255, 255, 0.1);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* Dark mode glass */
+[data-theme="dark"] .glass {
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 /* Section divider */
@@ -255,4 +325,49 @@
     ),
     linear-gradient(90deg, rgba(78, 205, 196, 0.1) 1px, transparent 1px);
   background-size: 50px 50px;
+}
+
+/* Dark mode patterns */
+[data-theme="dark"] .pattern-dots {
+  opacity: 0.05;
+}
+
+[data-theme="dark"] .pattern-grid {
+  background-image: linear-gradient(
+      rgba(255, 107, 107, 0.05) 1px,
+      transparent 1px
+    ),
+    linear-gradient(90deg, rgba(78, 205, 196, 0.05) 1px, transparent 1px);
+}
+
+/* Enhanced form inputs for better visibility */
+.input,
+.select,
+.textarea {
+  @apply border-2 border-base-300 bg-base-100 text-base-content;
+}
+
+.input:focus,
+.select:focus,
+.textarea:focus {
+  @apply border-primary outline-none ring-2 ring-primary/20;
+}
+
+.input:hover,
+.select:hover,
+.textarea:hover {
+  @apply border-base-content/30;
+}
+
+/* Dark mode form improvements */
+[data-theme="dark"] .input,
+[data-theme="dark"] .select,
+[data-theme="dark"] .textarea {
+  @apply border-base-content/20 bg-base-200;
+}
+
+[data-theme="dark"] .input:focus,
+[data-theme="dark"] .select:focus,
+[data-theme="dark"] .textarea:focus {
+  @apply border-primary ring-primary/30;
 }

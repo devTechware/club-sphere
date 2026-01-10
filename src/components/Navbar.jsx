@@ -2,16 +2,23 @@ import { Link, NavLink } from "react-router";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import useAuth from "../hooks/useAuth";
+import { useTheme } from "../providers/ThemeProvider";
 import api from "../utils/api";
 import toast from "react-hot-toast";
-import { FaRocket, FaTachometerAlt, FaSignOutAlt } from "react-icons/fa";
+import {
+  FaRocket,
+  FaTachometerAlt,
+  FaSignOutAlt,
+  FaMoon,
+  FaSun,
+} from "react-icons/fa";
 import { motion } from "framer-motion";
 
 const Navbar = () => {
   const { user, logOut } = useAuth();
+  const { toggleTheme, isDark } = useTheme();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
-  // Fetch user profile to get role
   const { data: profile } = useQuery({
     queryKey: ["userProfile"],
     queryFn: async () => {
@@ -50,7 +57,7 @@ const Navbar = () => {
       initial={{ y: -100 }}
       animate={{ y: 0 }}
       transition={{ duration: 0.5 }}
-      className="bg-white shadow-lg sticky top-0 z-50 border-b-2 border-base-200"
+      className="bg-base-100 shadow-lg sticky top-0 z-50 border-b-2 border-base-300"
     >
       <div className="navbar container mx-auto px-4">
         {/* Logo - Left */}
@@ -65,7 +72,7 @@ const Navbar = () => {
             >
               <FaRocket className="text-white text-xl" />
             </motion.div>
-            <span className="text-2xl font-black text-neutral">
+            <span className="text-2xl font-black text-base-content">
               Club<span className="text-primary">Sphere</span>
             </span>
           </Link>
@@ -79,10 +86,10 @@ const Navbar = () => {
                 <NavLink
                   to={link.to}
                   className={({ isActive }) =>
-                    `font-semibold px-4 rounded-lg ${
+                    `font-semibold px-4 rounded-lg transition-all ${
                       isActive
                         ? "bg-primary text-white"
-                        : "text-neutral hover:bg-base-200"
+                        : "text-base-content hover:bg-base-200"
                     }`
                   }
                 >
@@ -93,8 +100,29 @@ const Navbar = () => {
           </ul>
         </div>
 
-        {/* Auth Buttons / User Menu - Right */}
-        <div className="navbar-end">
+        {/* Right Side */}
+        <div className="navbar-end gap-2">
+          {/* Theme Toggle */}
+          <motion.button
+            onClick={toggleTheme}
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
+            className="btn btn-ghost btn-circle"
+            aria-label="Toggle theme"
+          >
+            <motion.div
+              initial={false}
+              animate={{ rotate: isDark ? 180 : 0 }}
+              transition={{ duration: 0.3 }}
+            >
+              {isDark ? (
+                <FaSun className="text-xl text-yellow-400" />
+              ) : (
+                <FaMoon className="text-xl text-primary" />
+              )}
+            </motion.div>
+          </motion.button>
+
           {user ? (
             <div className="dropdown dropdown-end">
               <div
@@ -114,15 +142,15 @@ const Navbar = () => {
               </div>
               <ul
                 tabIndex={0}
-                className="menu menu-sm dropdown-content bg-base-100 rounded-box z-[1] mt-3 w-56 p-2 shadow-xl border border-base-200"
+                className="menu menu-sm dropdown-content bg-base-100 rounded-box z-[1] mt-3 w-56 p-2 shadow-xl border-2 border-base-300"
               >
                 <li className="menu-title px-4 py-2">
                   <div>
-                    <span className="font-bold text-sm">
+                    <span className="font-bold text-sm text-base-content">
                       {user?.displayName}
                     </span>
                     <br />
-                    <span className="text-xs text-gray-500">{user?.email}</span>
+                    <span className="text-xs opacity-60">{user?.email}</span>
                   </div>
                 </li>
                 <div className="divider my-1"></div>
@@ -160,8 +188,8 @@ const Navbar = () => {
             </div>
           )}
 
-          {/* Mobile Menu Button */}
-          <div className="dropdown dropdown-end lg:hidden ml-2">
+          {/* Mobile Menu */}
+          <div className="dropdown dropdown-end lg:hidden">
             <div
               tabIndex={0}
               role="button"
@@ -186,7 +214,7 @@ const Navbar = () => {
             {isMenuOpen && (
               <ul
                 tabIndex={0}
-                className="menu menu-sm dropdown-content bg-base-100 rounded-box z-[1] mt-3 w-52 p-2 shadow-xl border border-base-200"
+                className="menu menu-sm dropdown-content bg-base-100 rounded-box z-[1] mt-3 w-52 p-2 shadow-xl border-2 border-base-300"
               >
                 {navLinks.map((link) => (
                   <li key={link.to}>

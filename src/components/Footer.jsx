@@ -19,21 +19,21 @@ const Footer = () => {
   ];
 
   return (
-    <footer className="bg-gradient-to-r from-neutral to-neutral/90 text-white mt-20">
+    <footer className="bg-neutral text-neutral-content mt-20">
       <div className="container mx-auto px-4 py-12">
         {/* Main Footer Content - 5 Columns */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 mb-8">
           {/* Column 1: Brand/Logo */}
           <div>
             <div className="flex items-center gap-2 mb-4">
-              <div className="bg-gradient-to-br from-primary to-secondary p-2 rounded-lg">
+              <div className="bg-linear-to-br from-primary to-secondary p-2 rounded-lg">
                 <FaRocket className="text-xl text-white" />
               </div>
               <h2 className="text-xl font-black">
                 Club<span className="text-primary">Sphere</span>
               </h2>
             </div>
-            <p className="text-white/70 text-sm leading-relaxed">
+            <p className="text-neutral-content/70 text-sm leading-relaxed">
               Connecting communities and creating memorable experiences.
             </p>
           </div>
@@ -45,7 +45,7 @@ const Footer = () => {
               <li>
                 <Link
                   to="/clubs"
-                  className="text-white/70 hover:text-primary transition-colors text-sm block"
+                  className="text-neutral-content/70 hover:text-primary transition-colors text-sm block"
                 >
                   Browse Clubs
                 </Link>
@@ -53,7 +53,7 @@ const Footer = () => {
               <li>
                 <Link
                   to="/events"
-                  className="text-white/70 hover:text-primary transition-colors text-sm block"
+                  className="text-neutral-content/70 hover:text-primary transition-colors text-sm block"
                 >
                   Upcoming Events
                 </Link>
@@ -61,7 +61,7 @@ const Footer = () => {
               <li>
                 <Link
                   to="/register"
-                  className="text-white/70 hover:text-primary transition-colors text-sm block"
+                  className="text-neutral-content/70 hover:text-primary transition-colors text-sm block"
                 >
                   Join Now
                 </Link>
@@ -76,7 +76,7 @@ const Footer = () => {
               <li>
                 <Link
                   to="/about"
-                  className="text-white/70 hover:text-secondary transition-colors text-sm block"
+                  className="text-neutral-content/70 hover:text-secondary transition-colors text-sm block"
                 >
                   About Us
                 </Link>
@@ -84,7 +84,7 @@ const Footer = () => {
               <li>
                 <Link
                   to="/contact"
-                  className="text-white/70 hover:text-secondary transition-colors text-sm block"
+                  className="text-neutral-content/70 hover:text-secondary transition-colors text-sm block"
                 >
                   Contact
                 </Link>
@@ -92,7 +92,7 @@ const Footer = () => {
               <li>
                 <Link
                   to="/privacy"
-                  className="text-white/70 hover:text-secondary transition-colors text-sm block"
+                  className="text-neutral-content/70 hover:text-secondary transition-colors text-sm block"
                 >
                   Privacy Policy
                 </Link>
@@ -100,7 +100,7 @@ const Footer = () => {
               <li>
                 <Link
                   to="/terms"
-                  className="text-white/70 hover:text-secondary transition-colors text-sm block"
+                  className="text-neutral-content/70 hover:text-secondary transition-colors text-sm block"
                 >
                   Terms of Service
                 </Link>
@@ -111,7 +111,7 @@ const Footer = () => {
           {/* Column 4: Social */}
           <div>
             <h6 className="font-bold text-base mb-4 text-accent">Connect</h6>
-            <p className="text-white/70 text-sm mb-4">
+            <p className="text-neutral-content/70 text-sm mb-4">
               Follow us on social media
             </p>
             <div className="flex gap-3">
@@ -123,7 +123,7 @@ const Footer = () => {
                   rel="noopener noreferrer"
                   whileHover={{ scale: 1.1, y: -2 }}
                   whileTap={{ scale: 0.95 }}
-                  className="btn btn-circle btn-sm bg-white/10 border-white/20 hover:bg-primary hover:border-primary text-white"
+                  className="btn btn-circle btn-sm bg-base-100/10 border-base-100/20 hover:bg-primary hover:border-primary text-neutral-content"
                 >
                   {social.icon}
                 </motion.a>
@@ -134,12 +134,14 @@ const Footer = () => {
           {/* Column 5: Newsletter */}
           <div>
             <h6 className="font-bold text-base mb-4">Newsletter</h6>
-            <p className="text-white/70 text-sm mb-4">Get updates on events</p>
+            <p className="text-neutral-content/70 text-sm mb-4">
+              Get updates on events
+            </p>
             <div className="flex flex-col gap-2">
               <input
                 type="email"
                 placeholder="your@email.com"
-                className="input input-sm bg-white/10 border-white/30 text-white placeholder:text-white/50 focus:border-primary rounded-lg"
+                className="input input-sm bg-base-100/10 border-base-100/30 text-neutral-content placeholder:text-neutral-content/50 focus:border-primary rounded-lg"
               />
               <button className="btn btn-sm btn-primary rounded-lg font-semibold gap-2">
                 <FaPaperPlane />
@@ -150,32 +152,32 @@ const Footer = () => {
         </div>
 
         {/* Bottom Bar */}
-        <div className="border-t border-white/10 pt-6">
+        <div className="border-t border-neutral-content/10 pt-6">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-            <p className="text-white/70 text-sm text-center md:text-left">
+            <p className="text-neutral-content/70 text-sm text-center md:text-left">
               © {currentYear}{" "}
-              <span className="font-bold text-white">ClubSphere</span>. All
-              rights reserved. Made with{" "}
+              <span className="font-bold text-neutral-content">ClubSphere</span>
+              . All rights reserved. Made with{" "}
               <FaHeart className="inline text-error mx-1" /> for communities.
             </p>
             <div className="flex gap-4 text-sm">
               <Link
                 to="/terms"
-                className="text-white/70 hover:text-white transition-colors"
+                className="text-neutral-content/70 hover:text-neutral-content transition-colors"
               >
                 Terms
               </Link>
-              <span className="text-white/30">•</span>
+              <span className="text-neutral-content/30">•</span>
               <Link
                 to="/privacy"
-                className="text-white/70 hover:text-white transition-colors"
+                className="text-neutral-content/70 hover:text-neutral-content transition-colors"
               >
                 Privacy
               </Link>
-              <span className="text-white/30">•</span>
+              <span className="text-neutral-content/30">•</span>
               <Link
                 to="/sitemap"
-                className="text-white/70 hover:text-white transition-colors"
+                className="text-neutral-content/70 hover:text-neutral-content transition-colors"
               >
                 Sitemap
               </Link>

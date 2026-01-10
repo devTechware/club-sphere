@@ -15,18 +15,24 @@ import Privacy from "../pages/Privacy";
 import Sitemap from "../pages/Sitemap";
 import PrivateRoute from "../components/PrivateRoute";
 import DashboardLayout from "../layouts/DashboardLayout";
+
+// Admin Dashboard Pages
 import AdminDashboard from "../pages/dashboard/admin/AdminDashboard";
-import ManagerDashboard from "../pages/dashboard/manager/ManagerDashboard";
-import MemberDashboard from "../pages/dashboard/member/MemberDashboard";
 import ManageUsers from "../pages/dashboard/admin/ManageUsers";
 import ManageClubs from "../pages/dashboard/admin/ManageClubs";
 import ManagePayments from "../pages/dashboard/admin/ManagePayments";
-import MyClubs from "../pages/dashboard/member/MyClubs";
-import MyEvents from "../pages/dashboard/member/MyEvents";
-import MyPayments from "../pages/dashboard/member/MyPayments";
+
+// Manager Dashboard Pages
+import ManagerDashboard from "../pages/dashboard/manager/ManagerDashboard";
 import ManagerMyClubs from "../pages/dashboard/manager/MyClubs";
 import ManagerMyEvents from "../pages/dashboard/manager/MyEvents";
 import MyMembers from "../pages/dashboard/manager/MyMembers";
+
+// Member Dashboard Pages
+import MemberDashboard from "../pages/dashboard/member/MemberDashboard";
+import MemberMyClubs from "../pages/dashboard/member/MyClubs";
+import MemberMyEvents from "../pages/dashboard/member/MyEvents";
+import MyPayments from "../pages/dashboard/member/MyPayments";
 
 const router = createBrowserRouter([
   {
@@ -133,11 +139,11 @@ const router = createBrowserRouter([
       },
       {
         path: "member/clubs",
-        element: <MyClubs />,
+        element: <MemberMyClubs />,
       },
       {
         path: "member/events",
-        element: <MyEvents />,
+        element: <MemberMyEvents />,
       },
       {
         path: "member/payments",
