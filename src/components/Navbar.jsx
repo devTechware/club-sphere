@@ -11,6 +11,7 @@ import {
   FaSignOutAlt,
   FaMoon,
   FaSun,
+  FaUserCircle,
 } from "react-icons/fa";
 import { motion } from "framer-motion";
 
@@ -68,7 +69,7 @@ const Navbar = () => {
           >
             <motion.div
               whileHover={{ rotate: 15 }}
-              className="bg-gradient-to-br from-primary to-secondary p-2 rounded-lg"
+              className="bg-linear-to-br from-primary to-secondary p-2 rounded-lg"
             >
               <FaRocket className="text-white text-xl" />
             </motion.div>
@@ -154,6 +155,12 @@ const Navbar = () => {
                   </div>
                 </li>
                 <div className="divider my-1"></div>
+                <li>
+                  <Link to="/profile" className="flex items-center gap-2">
+                    <FaUserCircle />
+                    My Profile
+                  </Link>
+                </li>
                 <li>
                   <Link
                     to={getDashboardLink()}

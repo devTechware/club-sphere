@@ -13,6 +13,7 @@ import Contact from "../pages/Contact";
 import Terms from "../pages/Terms";
 import Privacy from "../pages/Privacy";
 import Sitemap from "../pages/Sitemap";
+import Profile from "../pages/Profile";
 import PrivateRoute from "../components/PrivateRoute";
 import DashboardLayout from "../layouts/DashboardLayout";
 
@@ -79,6 +80,14 @@ const router = createBrowserRouter([
       {
         path: "/sitemap",
         element: <Sitemap />,
+      },
+      {
+        path: "/profile",
+        element: (
+          <PrivateRoute>
+            <Profile />
+          </PrivateRoute>
+        ),
       },
       {
         path: "/login",
