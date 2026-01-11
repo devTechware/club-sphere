@@ -2,122 +2,124 @@ import { useState } from "react";
 import { Link } from "react-router";
 import { motion } from "framer-motion";
 import { useClubs } from "../hooks/useClubs";
-import { FaUsers, FaSearch, FaFilter, FaStar, FaArrowRight } from "react-icons/fa";
+import {
+  FaSearch,
+  FaFilter,
+  FaUsers,
+  FaStar,
+  FaMapMarkerAlt,
+  FaArrowRight,
+} from "react-icons/fa";
 
 const Clubs = () => {
-  const [search, setSearch] = useState("");
-  const [category, setCategory] = useState("all");
-  const [sort, setSort] = useState("newest");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("");
+  const [sortBy, setSortBy] = useState("newest");
 
-  const { data: clubs, isLoading, isError } = useClubs(search, category, sort);
+  const { data: clubs, isLoading } = useClubs({
+    search: searchTerm,
+    category: selectedCategory,
+    sort: sortBy,
+  });
 
   const categories = [
-    "all",
+    "All",
+    "Technology",
     "Sports",
     "Arts",
-    "Technology",
     "Music",
-    "Photography",
-    "Reading",
     "Gaming",
-    "Fitness",
-    "Other",
+    "Photography",
+    "Business",
+    "Health",
+    "Education",
   ];
 
   const sortOptions = [
     { value: "newest", label: "Newest First" },
     { value: "oldest", label: "Oldest First" },
-    { value: "highestFee", label: "Highest Fee" },
-    { value: "lowestFee", label: "Lowest Fee" },
+    { value: "members", label: "Most Members" },
+    { value: "name", label: "Name (A-Z)" },
+    { value: "fee-low", label: "Fee (Low to High)" },
+    { value: "fee-high", label: "Fee (High to Low)" },
   ];
 
   const fadeInUp = {
-    hidden: { opacity: 0, y: 30 },
-    visible: { opacity: 1, y: 0, transition: { duration: 0.5 } }
+    hidden: { opacity: 0, y: 20 },
+    visible: { opacity: 1, y: 0 },
   };
 
   const staggerContainer = {
     hidden: { opacity: 0 },
-    visible: { opacity: 1, transition: { staggerChildren: 0.1 } }
+    visible: {
+      opacity: 1,
+      transition: { staggerChildren: 0.1 },
+    },
   };
 
   return (
     <div className="min-h-screen bg-base-100">
       {/* Header Section */}
-      <section className="bg-linear-to-r from-primary to-secondary py-16">
+      <section className="bg-linear-to-r from-primary/20 via-secondary/20 to-accent/20 py-16">
         <div className="container mx-auto px-4">
           <motion.div
-            initial={{ opacity: 0, y: -20 }}
+            initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
-            className="text-center text-white"
+            className="text-center max-w-3xl mx-auto"
           >
             <h1 className="text-5xl md:text-6xl font-black mb-4">
-              Discover Amazing Clubs
+              Explore <span className="text-gradient">Clubs</span>
             </h1>
-            <p className="text-xl md:text-2xl font-medium max-w-2xl mx-auto">
-              Find the perfect community that matches your interests
+            <p className="text-lg md:text-xl text-base-content/70 mb-8">
+              Discover amazing clubs and find your perfect community
             </p>
+
+            {/* Search Bar */}
+            <div className="relative max-w-2xl mx-auto">
+              <FaSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-base-content/50 text-xl" />
+              <input
+                type="text"
+                placeholder="Search clubs by name or description..."
+                className="input input-bordered input-lg w-full pl-12 pr-4 shadow-lg"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
           </motion.div>
         </div>
       </section>
 
-      <div className="container mx-auto px-4 py-12">
-        {/* Search and Filter Section */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="bg-white shadow-xl rounded-2xl p-6 mb-12 border-2 border-base-200"
-        >
-          <div className="flex items-center gap-2 mb-6">
-            <FaFilter className="text-2xl text-primary" />
-            <h2 className="text-2xl font-bold">Filter & Search</h2>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {/* Search */}
-            <div className="form-control">
-              <label className="label">
-                <span className="label-text font-bold text-base">Search Clubs</span>
-              </label>
-              <div className="relative">
-                <input
-                  type="text"
-                  placeholder="Search by name..."
-                  className="input input-bordered w-full pr-10 focus:input-primary"
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                />
-                <FaSearch className="absolute right-4 top-4 text-gray-400" />
-              </div>
-            </div>
-
+      {/* Filters Section */}
+      <section className="bg-base-200 border-y-2 border-base-300 sticky top-[73px] z-40">
+        <div className="container mx-auto px-4 py-6">
+          <div className="flex flex-col lg:flex-row gap-4 items-center justify-between">
             {/* Category Filter */}
-            <div className="form-control">
-              <label className="label">
-                <span className="label-text font-bold text-base">Category</span>
-              </label>
-              <select
-                className="select select-bordered w-full focus:select-primary"
-                value={category}
-                onChange={(e) => setCategory(e.target.value)}
-              >
-                {categories.map((cat) => (
-                  <option key={cat} value={cat}>
-                    {cat === "all" ? "All Categories" : cat}
-                  </option>
-                ))}
-              </select>
+            <div className="flex flex-wrap gap-2 justify-center lg:justify-start">
+              {categories.map((category) => (
+                <button
+                  key={category}
+                  onClick={() =>
+                    setSelectedCategory(category === "All" ? "" : category)
+                  }
+                  className={`btn btn-sm ${
+                    (category === "All" && !selectedCategory) ||
+                    selectedCategory === category
+                      ? "btn-primary"
+                      : "btn-outline"
+                  }`}
+                >
+                  {category}
+                </button>
+              ))}
             </div>
 
-            {/* Sort */}
-            <div className="form-control">
-              <label className="label">
-                <span className="label-text font-bold text-base">Sort By</span>
-              </label>
+            {/* Sort Dropdown */}
+            <div className="flex items-center gap-3">
+              <FaFilter className="text-base-content/70" />
               <select
-                className="select select-bordered w-full focus:select-primary"
-                value={sort}
-                onChange={(e) => setSort(e.target.value)}
+                className="select select-bordered select-sm font-semibold"
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value)}
               >
                 {sortOptions.map((option) => (
                   <option key={option.value} value={option.value}>
@@ -127,101 +129,132 @@ const Clubs = () => {
               </select>
             </div>
           </div>
-        </motion.div>
+        </div>
+      </section>
 
-        {/* Results Count */}
-        {!isLoading && clubs && (
-          <div className="flex items-center justify-between mb-8">
-            <p className="text-lg font-semibold text-gray-600">
-              Found <span className="text-primary font-bold">{clubs.length}</span> clubs
+      {/* Clubs Grid Section */}
+      <section className="py-12">
+        <div className="container mx-auto px-4">
+          {/* Results Count */}
+          <div className="mb-8">
+            <p className="text-base-content/70 font-semibold">
+              {clubs?.length || 0} clubs found
+              {searchTerm && <span> for "{searchTerm}"</span>}
+              {selectedCategory && <span> in {selectedCategory}</span>}
             </p>
           </div>
-        )}
 
-        {/* Clubs Grid */}
-        {isLoading ? (
-          <div className="flex justify-center items-center py-24">
-            <div className="text-center">
-              <span className="loading loading-spinner loading-lg text-primary"></span>
-              <p className="mt-4 text-gray-600 font-medium">Loading amazing clubs...</p>
+          {/* Loading State */}
+          {isLoading && (
+            <div className="flex justify-center items-center py-20">
+              <div className="text-center">
+                <span className="loading loading-spinner loading-lg text-primary"></span>
+                <p className="mt-4 font-semibold text-base-content/70">
+                  Loading clubs...
+                </p>
+              </div>
             </div>
-          </div>
-        ) : isError ? (
-          <div className="alert alert-error shadow-lg">
-            <span>Error loading clubs. Please try again.</span>
-          </div>
-        ) : clubs?.length === 0 ? (
-          <div className="text-center py-24">
-            <div className="text-6xl mb-4">🔍</div>
-            <p className="text-2xl font-bold text-gray-600 mb-2">No clubs found</p>
-            <p className="text-gray-500">Try adjusting your filters</p>
-          </div>
-        ) : (
-          <motion.div
-            variants={staggerContainer}
-            initial="hidden"
-            animate="visible"
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
-          >
-            {clubs?.map((club) => (
-              <motion.div
-                key={club._id}
-                variants={fadeInUp}
-                whileHover={{ y: -8 }}
+          )}
+
+          {/* Empty State */}
+          {!isLoading && clubs?.length === 0 && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="text-center py-20"
+            >
+              <div className="text-6xl mb-4">🔍</div>
+              <h3 className="text-2xl font-bold mb-2">No clubs found</h3>
+              <p className="text-base-content/70 mb-6">
+                Try adjusting your search or filters
+              </p>
+              <button
+                onClick={() => {
+                  setSearchTerm("");
+                  setSelectedCategory("");
+                  setSortBy("newest");
+                }}
+                className="btn btn-primary"
               >
-                <Link to={`/clubs/${club._id}`}>
-                  <div className="card bg-white shadow-xl hover:shadow-2xl transition-all duration-300 border-2 border-transparent hover:border-primary h-full">
-                    <figure className="relative h-52 overflow-hidden">
-                      <img
-                        src={club.bannerImage || `https://source.unsplash.com/800x600/?${club.category},club`}
-                        alt={club.clubName}
-                        className="w-full h-full object-cover hover:scale-110 transition-transform duration-500"
-                      />
-                      <div className="absolute inset-0 bg-linear-to-t from-black/60 to-transparent"></div>
-                      <div className="absolute top-4 right-4">
-                        <div className="badge badge-primary badge-lg font-bold shadow-lg">
-                          {club.category}
-                        </div>
-                      </div>
-                      <div className="absolute bottom-4 left-4 flex items-center gap-2 text-white">
-                        <FaStar className="text-accent" />
-                        <span className="font-semibold">Featured</span>
-                      </div>
-                    </figure>
-                    <div className="card-body">
-                      <h2 className="card-title text-xl font-bold line-clamp-1">
-                        {club.clubName}
-                      </h2>
-                      <p className="text-gray-600 line-clamp-2 flex-grow">
-                        {club.description}
-                      </p>
-                      
-                      <div className="divider my-2"></div>
-                      
-                      <div className="flex justify-between items-center">
-                        <div className="flex items-center gap-2">
-                          <div className="badge badge-outline">
-                            <FaUsers className="mr-1" />
-                            {club.memberCount || 0}
+                Clear Filters
+              </button>
+            </motion.div>
+          )}
+
+          {/* Clubs Grid - 4 Cards Per Row on Desktop */}
+          {!isLoading && clubs && clubs.length > 0 && (
+            <motion.div
+              initial="hidden"
+              animate="visible"
+              variants={staggerContainer}
+              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
+            >
+              {clubs.map((club) => (
+                <motion.div key={club._id} variants={fadeInUp}>
+                  <Link to={`/clubs/${club._id}`}>
+                    <div className="card bg-base-100 shadow-xl border-2 border-base-200 overflow-hidden card-hover h-full">
+                      {/* Club Image */}
+                      <figure className="h-48 overflow-hidden relative">
+                        <img
+                          src={
+                            club.bannerImage ||
+                            `https://ui-avatars.com/api/?name=${club.clubName}&size=600&background=random`
+                          }
+                          alt={club.clubName}
+                          className="w-full h-full object-cover"
+                        />
+                        <div className="absolute top-3 left-3">
+                          <div className="badge badge-primary font-bold shadow-lg">
+                            {club.category}
                           </div>
                         </div>
-                        <div className="text-xl font-black text-primary">
-                          {club.membershipFee > 0 ? `$${club.membershipFee}` : "FREE"}
+                        {club.status === "pending" && (
+                          <div className="absolute top-3 right-3">
+                            <div className="badge badge-warning font-bold shadow-lg">
+                              Pending
+                            </div>
+                          </div>
+                        )}
+                      </figure>
+
+                      {/* Club Content */}
+                      <div className="card-body p-5">
+                        <h3 className="card-title text-lg font-bold line-clamp-1">
+                          {club.clubName}
+                        </h3>
+                        <p className="text-base-content/70 text-sm line-clamp-2 leading-relaxed">
+                          {club.description}
+                        </p>
+
+                        {/* Club Stats */}
+                        <div className="flex items-center justify-between mt-3 pt-3 border-t border-base-300">
+                          <div className="flex items-center gap-2">
+                            <FaUsers className="text-secondary text-sm" />
+                            <span className="text-xs font-bold">
+                              {club.memberCount || 0} members
+                            </span>
+                          </div>
+                          <div className="badge badge-accent font-bold text-xs">
+                            {club.membershipFee === 0
+                              ? "FREE"
+                              : `$${club.membershipFee}`}
+                          </div>
                         </div>
+
+                        {/* Join Button */}
+                        <button className="btn btn-primary btn-sm w-full mt-3 font-bold group">
+                          Join Club
+                          <FaArrowRight className="group-hover:translate-x-1 transition-transform" />
+                        </button>
                       </div>
-                      
-                      <button className="btn btn-primary w-full mt-4 font-bold group">
-                        View Details
-                        <FaArrowRight className="ml-2 group-hover:translate-x-1 transition-transform" />
-                      </button>
                     </div>
-                  </div>
-                </Link>
-              </motion.div>
-            ))}
-          </motion.div>
-        )}
-      </div>
+                  </Link>
+                </motion.div>
+              ))}
+            </motion.div>
+          )}
+        </div>
+      </section>
     </div>
   );
 };
