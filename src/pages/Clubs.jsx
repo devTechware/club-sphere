@@ -2,14 +2,8 @@ import { useState } from "react";
 import { Link } from "react-router";
 import { motion } from "framer-motion";
 import { useClubs } from "../hooks/useClubs";
-import {
-  FaSearch,
-  FaFilter,
-  FaUsers,
-  FaStar,
-  FaMapMarkerAlt,
-  FaArrowRight,
-} from "react-icons/fa";
+import CardSkeleton from "../components/skeletons/CardSkeleton";
+import { FaSearch, FaFilter, FaUsers, FaArrowRight } from "react-icons/fa";
 
 const Clubs = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -136,23 +130,22 @@ const Clubs = () => {
       <section className="py-12">
         <div className="container mx-auto px-4">
           {/* Results Count */}
-          <div className="mb-8">
-            <p className="text-base-content/70 font-semibold">
-              {clubs?.length || 0} clubs found
-              {searchTerm && <span> for "{searchTerm}"</span>}
-              {selectedCategory && <span> in {selectedCategory}</span>}
-            </p>
-          </div>
+          {!isLoading && (
+            <div className="mb-8">
+              <p className="text-base-content/70 font-semibold">
+                {clubs?.length || 0} clubs found
+                {searchTerm && <span> for "{searchTerm}"</span>}
+                {selectedCategory && <span> in {selectedCategory}</span>}
+              </p>
+            </div>
+          )}
 
-          {/* Loading State */}
+          {/* Skeleton Loading State */}
           {isLoading && (
-            <div className="flex justify-center items-center py-20">
-              <div className="text-center">
-                <span className="loading loading-spinner loading-lg text-primary"></span>
-                <p className="mt-4 font-semibold text-base-content/70">
-                  Loading clubs...
-                </p>
-              </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {[...Array(8)].map((_, index) => (
+                <CardSkeleton key={index} />
+              ))}
             </div>
           )}
 
@@ -181,7 +174,7 @@ const Clubs = () => {
             </motion.div>
           )}
 
-          {/* Clubs Grid - 4 Cards Per Row on Desktop */}
+          {/* Clubs Grid */}
           {!isLoading && clubs && clubs.length > 0 && (
             <motion.div
               initial="hidden"
@@ -193,7 +186,6 @@ const Clubs = () => {
                 <motion.div key={club._id} variants={fadeInUp}>
                   <Link to={`/clubs/${club._id}`}>
                     <div className="card bg-base-100 shadow-xl border-2 border-base-200 overflow-hidden card-hover h-full">
-                      {/* Club Image */}
                       <figure className="h-48 overflow-hidden relative">
                         <img
                           src={
@@ -217,7 +209,6 @@ const Clubs = () => {
                         )}
                       </figure>
 
-                      {/* Club Content */}
                       <div className="card-body p-5">
                         <h3 className="card-title text-lg font-bold line-clamp-1">
                           {club.clubName}
@@ -226,7 +217,6 @@ const Clubs = () => {
                           {club.description}
                         </p>
 
-                        {/* Club Stats */}
                         <div className="flex items-center justify-between mt-3 pt-3 border-t border-base-300">
                           <div className="flex items-center gap-2">
                             <FaUsers className="text-secondary text-sm" />
@@ -241,7 +231,6 @@ const Clubs = () => {
                           </div>
                         </div>
 
-                        {/* Join Button */}
                         <button className="btn btn-primary btn-sm w-full mt-3 font-bold group">
                           Join Club
                           <FaArrowRight className="group-hover:translate-x-1 transition-transform" />

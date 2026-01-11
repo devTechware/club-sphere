@@ -28,6 +28,8 @@ import {
   Legend,
   ResponsiveContainer,
 } from "recharts";
+import StatsCardSkeleton from "../../../components/skeletons/StatsCardSkeleton";
+import ChartSkeleton from "../../../components/skeletons/ChartSkeleton";
 
 const AdminDashboard = () => {
   // Fetch dashboard stats
@@ -111,10 +113,22 @@ const AdminDashboard = () => {
 
   if (isLoading) {
     return (
-      <div className="flex justify-center items-center min-h-[60vh]">
-        <div className="text-center">
-          <span className="loading loading-spinner loading-lg text-primary"></span>
-          <p className="mt-4 font-semibold">Loading dashboard...</p>
+      <div className="space-y-8">
+        {/* Stats Cards Skeleton */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {[...Array(4)].map((_, index) => (
+            <StatsCardSkeleton key={index} />
+          ))}
+        </div>
+
+        {/* Charts Skeleton */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <ChartSkeleton />
+          <ChartSkeleton />
+        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <ChartSkeleton />
+          <ChartSkeleton />
         </div>
       </div>
     );

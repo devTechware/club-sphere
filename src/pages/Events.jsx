@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router";
 import { motion } from "framer-motion";
 import { useEvents } from "../hooks/useEvents";
+import EventCardSkeleton from "../components/skeletons/EventCardSkeleton";
 import {
   FaSearch,
   FaFilter,
@@ -73,7 +74,6 @@ const Events = () => {
               Discover and register for exciting events in your community
             </p>
 
-            {/* Search Bar */}
             <div className="relative max-w-2xl mx-auto">
               <FaSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-base-content/50 text-xl" />
               <input
@@ -92,7 +92,6 @@ const Events = () => {
       <section className="bg-base-200 border-y-2 border-base-300 sticky top-[73px] z-40">
         <div className="container mx-auto px-4 py-6">
           <div className="flex flex-col lg:flex-row gap-4 items-center justify-between">
-            {/* Filter Buttons */}
             <div className="flex flex-wrap gap-2 justify-center lg:justify-start">
               {filterOptions.map((option) => (
                 <button
@@ -109,7 +108,6 @@ const Events = () => {
               ))}
             </div>
 
-            {/* Sort Dropdown */}
             <div className="flex items-center gap-3">
               <FaFilter className="text-base-content/70" />
               <select
@@ -131,23 +129,21 @@ const Events = () => {
       {/* Events Grid Section */}
       <section className="py-12">
         <div className="container mx-auto px-4">
-          {/* Results Count */}
-          <div className="mb-8">
-            <p className="text-base-content/70 font-semibold">
-              {events?.length || 0} events found
-              {searchTerm && <span> for "{searchTerm}"</span>}
-            </p>
-          </div>
+          {!isLoading && (
+            <div className="mb-8">
+              <p className="text-base-content/70 font-semibold">
+                {events?.length || 0} events found
+                {searchTerm && <span> for "{searchTerm}"</span>}
+              </p>
+            </div>
+          )}
 
-          {/* Loading State */}
+          {/* Skeleton Loading State */}
           {isLoading && (
-            <div className="flex justify-center items-center py-20">
-              <div className="text-center">
-                <span className="loading loading-spinner loading-lg text-secondary"></span>
-                <p className="mt-4 font-semibold text-base-content/70">
-                  Loading events...
-                </p>
-              </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {[...Array(8)].map((_, index) => (
+                <EventCardSkeleton key={index} />
+              ))}
             </div>
           )}
 
@@ -176,7 +172,7 @@ const Events = () => {
             </motion.div>
           )}
 
-          {/* Events Grid - 4 Cards Per Row on Desktop */}
+          {/* Events Grid */}
           {!isLoading && events && events.length > 0 && (
             <motion.div
               initial="hidden"
@@ -189,7 +185,6 @@ const Events = () => {
                   <Link to={`/events/${event._id}`}>
                     <div className="card bg-base-100 shadow-xl border-2 border-base-200 card-hover h-full">
                       <div className="card-body p-5">
-                        {/* Event Header */}
                         <div className="flex items-start justify-between mb-3">
                           <div className="badge badge-secondary font-bold text-xs">
                             {event.clubName}
@@ -205,22 +200,17 @@ const Events = () => {
                           )}
                         </div>
 
-                        {/* Event Title */}
                         <h3 className="card-title text-lg font-bold line-clamp-2 mb-2">
                           {event.title}
                         </h3>
 
-                        {/* Event Description */}
                         <p className="text-base-content/70 text-sm line-clamp-2 leading-relaxed mb-3">
                           {event.description}
                         </p>
 
-                        {/* Divider */}
                         <div className="divider my-2"></div>
 
-                        {/* Event Details */}
                         <div className="space-y-2">
-                          {/* Date */}
                           <div className="flex items-center gap-2 text-sm">
                             <FaCalendar className="text-secondary flex-shrink-0" />
                             <span className="font-semibold">
@@ -235,7 +225,6 @@ const Events = () => {
                             </span>
                           </div>
 
-                          {/* Time */}
                           <div className="flex items-center gap-2 text-sm">
                             <FaClock className="text-accent flex-shrink-0" />
                             <span className="font-semibold">
@@ -249,7 +238,6 @@ const Events = () => {
                             </span>
                           </div>
 
-                          {/* Location */}
                           <div className="flex items-center gap-2 text-sm">
                             <FaMapMarkerAlt className="text-primary flex-shrink-0" />
                             <span className="truncate font-semibold">
@@ -257,7 +245,6 @@ const Events = () => {
                             </span>
                           </div>
 
-                          {/* Capacity */}
                           {event.maxParticipants && (
                             <div className="flex items-center gap-2 text-sm">
                               <FaUsers className="text-info flex-shrink-0" />
@@ -269,7 +256,6 @@ const Events = () => {
                           )}
                         </div>
 
-                        {/* Register Button */}
                         <button
                           className={`btn btn-sm w-full mt-4 font-bold group ${
                             isUpcoming(event.eventDate)

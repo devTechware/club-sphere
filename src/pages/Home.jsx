@@ -23,6 +23,10 @@ import {
   FaQuestion,
 } from "react-icons/fa";
 import { useState } from "react";
+import {
+  ClubsSkeleton,
+  EventsSkeleton,
+} from "../components/skeletons/HomeSkeleton";
 
 const Home = () => {
   const { data: featuredClubs, isLoading: clubsLoading } = useFeaturedClubs();
@@ -455,9 +459,7 @@ const Home = () => {
           </div>
 
           {clubsLoading ? (
-            <div className="flex justify-center py-20">
-              <span className="loading loading-spinner loading-lg text-primary"></span>
-            </div>
+            <ClubsSkeleton />
           ) : (
             <motion.div
               initial="hidden"
@@ -556,9 +558,7 @@ const Home = () => {
           </div>
 
           {eventsLoading ? (
-            <div className="flex justify-center py-20">
-              <span className="loading loading-spinner loading-lg text-secondary"></span>
-            </div>
+            <EventsSkeleton />
           ) : (
             <motion.div
               initial="hidden"
