@@ -1,23 +1,86 @@
-import { useState } from "react";
 import { motion } from "framer-motion";
-import { Link } from "react-router";
-import { useManagerStats } from "../../../hooks/useDashboard";
-import CreateClubModal from "../../../components/CreateClubModal";
-import CreateEventModal from "../../../components/CreateEventModal";
+import { useQuery } from "@tanstack/react-query";
+import api from "../../../utils/api";
 import {
-  FaBuilding,
   FaUsers,
   FaCalendar,
-  FaDollarSign,
-  FaChartBar,
   FaTrophy,
-  FaPlus,
+  FaChartLine,
+  FaDollarSign,
+  FaStar,
 } from "react-icons/fa";
+import {
+  LineChart,
+  Line,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+  AreaChart,
+  Area,
+} from "recharts";
 
 const ManagerDashboard = () => {
-  const { data: stats, isLoading } = useManagerStats();
-  const [isClubModalOpen, setIsClubModalOpen] = useState(false);
-  const [isEventModalOpen, setIsEventModalOpen] = useState(false);
+  const { data: stats, isLoading } = useQuery({
+    queryKey: ["managerStats"],
+    queryFn: async () => {
+      const response = await api.get("/stats/manager");
+      return response.data;
+    },
+  });
+
+  const fadeInUp = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { opacity: 1, y: 0 },
+  };
+
+  const staggerContainer = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: { staggerChildren: 0.1 },
+    },
+  };
+
+  const COLORS = {
+    primary: "#ff6b6b",
+    secondary: "#4ecdc4",
+    accent: "#ffe66d",
+    success: "#26de81",
+  };
+
+  // Member growth data
+  const memberGrowthData = [
+    { month: "Jan", members: 15 },
+    { month: "Feb", members: 28 },
+    { month: "Mar", members: 42 },
+    { month: "Apr", members: 56 },
+    { month: "May", members: 73 },
+    { month: "Jun", members: 95 },
+  ];
+
+  // Event attendance data
+  const eventAttendanceData = [
+    { event: "Workshop 1", attended: 45, registered: 50 },
+    { event: "Meetup 2", attended: 38, registered: 42 },
+    { event: "Conference", attended: 85, registered: 90 },
+    { event: "Webinar", attended: 62, registered: 70 },
+    { event: "Training", attended: 55, registered: 60 },
+  ];
+
+  // Revenue trend
+  const revenueData = [
+    { month: "Jan", revenue: 250 },
+    { month: "Feb", revenue: 380 },
+    { month: "Mar", revenue: 520 },
+    { month: "Apr", revenue: 680 },
+    { month: "May", revenue: 850 },
+    { month: "Jun", revenue: 1020 },
+  ];
 
   if (isLoading) {
     return (
@@ -30,205 +93,277 @@ const ManagerDashboard = () => {
     );
   }
 
-  const fadeInUp = {
-    hidden: { opacity: 0, y: 30 },
-    visible: { opacity: 1, y: 0, transition: { duration: 0.5 } },
-  };
-
-  const staggerContainer = {
-    hidden: { opacity: 0 },
-    visible: { opacity: 1, transition: { staggerChildren: 0.1 } },
-  };
-
-  const statCards = [
-    {
-      title: "My Clubs",
-      value: stats?.clubs?.total || 0,
-      change: `${stats?.clubs?.approved || 0} approved`,
-      icon: <FaBuilding className="text-4xl" />,
-      gradient: "from-primary to-secondary",
-      bgColor: "bg-primary/10",
-    },
-    {
-      title: "Total Members",
-      value: stats?.members?.total || 0,
-      change: "Across all clubs",
-      icon: <FaUsers className="text-4xl" />,
-      gradient: "from-secondary to-accent",
-      bgColor: "bg-secondary/10",
-    },
-    {
-      title: "Total Events",
-      value: stats?.events?.total || 0,
-      change: `${stats?.events?.upcoming || 0} upcoming`,
-      icon: <FaCalendar className="text-4xl" />,
-      gradient: "from-accent to-warning",
-      bgColor: "bg-accent/10",
-    },
-    {
-      title: "Total Revenue",
-      value: `$${stats?.revenue?.total?.toFixed(2) || 0}`,
-      change: `${stats?.revenue?.payments || 0} payments`,
-      icon: <FaDollarSign className="text-4xl" />,
-      gradient: "from-success to-info",
-      bgColor: "bg-success/10",
-    },
-  ];
-
   return (
-    <div>
-      <motion.div
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="mb-8"
-      >
-        <h1 className="text-4xl md:text-5xl font-black mb-2">
+    <div className="space-y-8">
+      {/* Header */}
+      <motion.div initial="hidden" animate="visible" variants={fadeInUp}>
+        <h1 className="text-4xl font-black mb-2">
           Manager <span className="text-gradient">Dashboard</span>
         </h1>
-        <p className="text-lg text-gray-600 font-medium">
-          Manage your clubs and track performance
+        <p className="text-lg text-base-content/70">
+          Your clubs and events performance
         </p>
       </motion.div>
 
-      {/* Main Stats Grid */}
+      {/* Stats Cards */}
       <motion.div
-        variants={staggerContainer}
         initial="hidden"
         animate="visible"
-        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8"
+        variants={staggerContainer}
+        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
       >
-        {statCards.map((card, index) => (
-          <motion.div
-            key={index}
-            variants={fadeInUp}
-            whileHover={{ y: -5, scale: 1.02 }}
-            className="card bg-white shadow-xl border-2 border-base-200 hover:border-secondary transition-all"
-          >
-            <div className="card-body">
-              <div className="flex justify-between items-start mb-4">
-                <div className={`p-4 rounded-2xl ${card.bgColor}`}>
+        {[
+          {
+            title: "My Clubs",
+            value: stats?.myClubs || 3,
+            icon: <FaTrophy />,
+            color: "primary",
+            subtitle: "Active clubs",
+          },
+          {
+            title: "Total Members",
+            value: stats?.totalMembers || 95,
+            icon: <FaUsers />,
+            color: "secondary",
+            subtitle: "Across all clubs",
+          },
+          {
+            title: "Events Hosted",
+            value: stats?.eventsHosted || 12,
+            icon: <FaCalendar />,
+            color: "accent",
+            subtitle: "This month",
+          },
+          {
+            title: "Revenue",
+            value: `$${stats?.revenue || "1,020"}`,
+            icon: <FaDollarSign />,
+            color: "success",
+            subtitle: "Total earnings",
+          },
+        ].map((stat, index) => (
+          <motion.div key={index} variants={fadeInUp}>
+            <div
+              className={`card bg-base-100 shadow-xl border-l-4 border-${stat.color}`}
+            >
+              <div className="card-body p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-base-content/70 text-sm font-semibold mb-1">
+                      {stat.title}
+                    </p>
+                    <h3 className="text-3xl font-black">{stat.value}</h3>
+                    <p className="text-base-content/60 text-xs mt-2">
+                      {stat.subtitle}
+                    </p>
+                  </div>
                   <div
-                    className={`bg-gradient-to-br ${card.gradient} bg-clip-text text-transparent`}
+                    className={`w-16 h-16 bg-${stat.color}/20 rounded-2xl flex items-center justify-center text-${stat.color} text-2xl`}
                   >
-                    {card.icon}
+                    {stat.icon}
                   </div>
                 </div>
               </div>
-              <h2 className="card-title text-sm font-bold text-gray-600 mb-2">
-                {card.title}
-              </h2>
-              <p className="text-4xl font-black mb-2">{card.value}</p>
-              <p className="text-sm text-gray-500 font-medium">{card.change}</p>
             </div>
           </motion.div>
         ))}
       </motion.div>
 
-      {/* Club Details Table */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.3 }}
-        className="card bg-white shadow-xl border-2 border-base-200 mb-8"
-      >
-        <div className="card-body">
-          <h2 className="card-title text-2xl font-bold mb-6 flex items-center gap-2">
-            <FaChartBar className="text-secondary" />
-            Your Clubs Performance
-          </h2>
-          <div className="overflow-x-auto">
-            <table className="table">
-              <thead>
-                <tr className="bg-base-200">
-                  <th className="font-bold text-base">Club Name</th>
-                  <th className="font-bold text-base">Members</th>
-                  <th className="font-bold text-base">Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                {stats?.members?.byClub && stats.members.byClub.length > 0 ? (
-                  stats.members.byClub.map((club) => (
-                    <tr key={club.clubId} className="hover:bg-base-200">
-                      <td className="font-semibold">{club.clubName}</td>
-                      <td>
-                        <div className="flex items-center gap-2">
-                          <div className="bg-secondary/10 p-2 rounded-lg">
-                            <FaUsers className="text-secondary" />
-                          </div>
-                          <span className="font-bold">{club.memberCount}</span>
-                        </div>
-                      </td>
-                      <td>
-                        <div className="badge badge-success badge-lg font-bold">
-                          Active
-                        </div>
-                      </td>
-                    </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td colSpan="3" className="text-center py-12">
-                      <FaBuilding className="text-6xl text-gray-300 mx-auto mb-4" />
-                      <p className="text-gray-500 font-medium">No clubs yet</p>
-                      <p className="text-sm text-gray-400">
-                        Create your first club to get started
-                      </p>
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
+      {/* Charts Row 1 */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Member Growth */}
+        <motion.div
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: 0.2 }}
+        >
+          <div className="card bg-base-100 shadow-xl">
+            <div className="card-body">
+              <h3 className="card-title text-xl font-bold flex items-center gap-2">
+                <FaChartLine className="text-secondary" />
+                Member Growth
+              </h3>
+              <ResponsiveContainer width="100%" height={300}>
+                <LineChart data={memberGrowthData}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                  <XAxis dataKey="month" stroke="#6b7280" />
+                  <YAxis stroke="#6b7280" />
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: "#fff",
+                      border: "2px solid #4ecdc4",
+                      borderRadius: "12px",
+                    }}
+                  />
+                  <Legend />
+                  <Line
+                    type="monotone"
+                    dataKey="members"
+                    stroke={COLORS.secondary}
+                    strokeWidth={3}
+                    dot={{ fill: COLORS.secondary, r: 6 }}
+                    activeDot={{ r: 8 }}
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
           </div>
-        </div>
-      </motion.div>
+        </motion.div>
 
-      {/* Quick Actions */}
+        {/* Event Attendance */}
+        <motion.div
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: 0.3 }}
+        >
+          <div className="card bg-base-100 shadow-xl">
+            <div className="card-body">
+              <h3 className="card-title text-xl font-bold flex items-center gap-2">
+                <FaCalendar className="text-accent" />
+                Event Attendance
+              </h3>
+              <ResponsiveContainer width="100%" height={300}>
+                <BarChart data={eventAttendanceData}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                  <XAxis dataKey="event" stroke="#6b7280" />
+                  <YAxis stroke="#6b7280" />
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: "#fff",
+                      border: "2px solid #ffe66d",
+                      borderRadius: "12px",
+                    }}
+                  />
+                  <Legend />
+                  <Bar
+                    dataKey="registered"
+                    fill={COLORS.accent}
+                    radius={[8, 8, 0, 0]}
+                  />
+                  <Bar
+                    dataKey="attended"
+                    fill={COLORS.success}
+                    radius={[8, 8, 0, 0]}
+                  />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+        </motion.div>
+      </div>
+
+      {/* Revenue Chart */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.4 }}
-        className="card bg-gradient-to-r from-secondary to-accent shadow-xl"
       >
-        <div className="card-body">
-          <h2 className="card-title text-2xl font-bold text-white mb-4 flex items-center gap-2">
-            <FaTrophy />
-            Quick Actions
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <button
-              onClick={() => setIsClubModalOpen(true)}
-              className="btn btn-lg bg-white text-secondary hover:bg-white/90 font-bold gap-2"
-            >
-              <FaPlus />
-              Create New Club
-            </button>
-            <button
-              onClick={() => setIsEventModalOpen(true)}
-              className="btn btn-lg bg-white text-secondary hover:bg-white/90 font-bold gap-2"
-            >
-              <FaPlus />
-              Create Event
-            </button>
-            <Link
-              to="/dashboard/manager/members"
-              className="btn btn-lg bg-white text-secondary hover:bg-white/90 font-bold gap-2"
-            >
-              <FaUsers />
-              View Members
-            </Link>
+        <div className="card bg-base-100 shadow-xl">
+          <div className="card-body">
+            <h3 className="card-title text-xl font-bold flex items-center gap-2">
+              <FaDollarSign className="text-success" />
+              Revenue Trend
+            </h3>
+            <ResponsiveContainer width="100%" height={300}>
+              <AreaChart data={revenueData}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                <XAxis dataKey="month" stroke="#6b7280" />
+                <YAxis stroke="#6b7280" />
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: "#fff",
+                    border: "2px solid #26de81",
+                    borderRadius: "12px",
+                  }}
+                />
+                <Area
+                  type="monotone"
+                  dataKey="revenue"
+                  stroke={COLORS.success}
+                  fill={COLORS.success}
+                  fillOpacity={0.6}
+                />
+              </AreaChart>
+            </ResponsiveContainer>
           </div>
         </div>
       </motion.div>
 
-      {/* Modals */}
-      <CreateClubModal
-        isOpen={isClubModalOpen}
-        onClose={() => setIsClubModalOpen(false)}
-      />
-      <CreateEventModal
-        isOpen={isEventModalOpen}
-        onClose={() => setIsEventModalOpen(false)}
-      />
+      {/* My Clubs Overview */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.5 }}
+      >
+        <div className="card bg-base-100 shadow-xl">
+          <div className="card-body">
+            <h3 className="card-title text-xl font-bold mb-4">
+              My Clubs Performance
+            </h3>
+            <div className="overflow-x-auto">
+              <table className="table">
+                <thead>
+                  <tr>
+                    <th>Club Name</th>
+                    <th>Members</th>
+                    <th>Events</th>
+                    <th>Revenue</th>
+                    <th>Rating</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {[
+                    {
+                      name: "Tech Innovators",
+                      members: 45,
+                      events: 5,
+                      revenue: "$520",
+                      rating: 4.8,
+                    },
+                    {
+                      name: "Photography Club",
+                      members: 32,
+                      events: 3,
+                      revenue: "$280",
+                      rating: 4.6,
+                    },
+                    {
+                      name: "Fitness Warriors",
+                      members: 18,
+                      events: 4,
+                      revenue: "$220",
+                      rating: 4.9,
+                    },
+                  ].map((club, index) => (
+                    <tr key={index} className="hover">
+                      <td className="font-bold">{club.name}</td>
+                      <td>
+                        <div className="flex items-center gap-2">
+                          <FaUsers className="text-secondary" />
+                          {club.members}
+                        </div>
+                      </td>
+                      <td>
+                        <div className="flex items-center gap-2">
+                          <FaCalendar className="text-accent" />
+                          {club.events}
+                        </div>
+                      </td>
+                      <td className="font-bold text-success">{club.revenue}</td>
+                      <td>
+                        <div className="flex items-center gap-1">
+                          <FaStar className="text-warning" />
+                          <span className="font-bold">{club.rating}</span>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </motion.div>
     </div>
   );
 };

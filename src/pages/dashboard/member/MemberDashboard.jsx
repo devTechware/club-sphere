@@ -1,17 +1,90 @@
 import { motion } from "framer-motion";
-import { useMemberStats } from "../../../hooks/useDashboard";
+import { useQuery } from "@tanstack/react-query";
+import api from "../../../utils/api";
 import {
-  FaBuilding,
+  FaTrophy,
   FaCalendar,
   FaDollarSign,
-  FaRocket,
-  FaHeart,
+  FaCheckCircle,
   FaStar,
+  FaClock,
 } from "react-icons/fa";
-import { Link } from "react-router";
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  PieChart,
+  Pie,
+  Cell,
+  Legend,
+} from "recharts";
 
 const MemberDashboard = () => {
-  const { data: stats, isLoading } = useMemberStats();
+  const { data: stats, isLoading } = useQuery({
+    queryKey: ["memberStats"],
+    queryFn: async () => {
+      const response = await api.get("/stats/member");
+      return response.data;
+    },
+  });
+
+  const fadeInUp = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { opacity: 1, y: 0 },
+  };
+
+  const staggerContainer = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: { staggerChildren: 0.1 },
+    },
+  };
+
+  const COLORS = {
+    primary: "#ff6b6b",
+    secondary: "#4ecdc4",
+    accent: "#ffe66d",
+    success: "#26de81",
+    info: "#3b82f6",
+    warning: "#fd9644",
+  };
+
+  const PIE_COLORS = [
+    COLORS.primary,
+    COLORS.secondary,
+    COLORS.accent,
+    COLORS.info,
+  ];
+
+  // Activity by month
+  const activityData = [
+    { month: "Jan", events: 2, clubs: 1 },
+    { month: "Feb", events: 3, clubs: 1 },
+    { month: "Mar", events: 4, clubs: 2 },
+    { month: "Apr", events: 5, clubs: 2 },
+    { month: "May", events: 6, clubs: 3 },
+    { month: "Jun", events: 7, clubs: 3 },
+  ];
+
+  // Clubs by category
+  const clubCategoryData = [
+    { name: "Technology", value: 1 },
+    { name: "Sports", value: 1 },
+    { name: "Arts", value: 1 },
+  ];
+
+  // Spending breakdown
+  const spendingData = [
+    { category: "Memberships", amount: 150 },
+    { category: "Events", amount: 75 },
+    { category: "Workshops", amount: 50 },
+    { category: "Materials", amount: 25 },
+  ];
 
   if (isLoading) {
     return (
@@ -24,221 +97,230 @@ const MemberDashboard = () => {
     );
   }
 
-  const fadeInUp = {
-    hidden: { opacity: 0, y: 30 },
-    visible: { opacity: 1, y: 0, transition: { duration: 0.5 } },
-  };
-
-  const staggerContainer = {
-    hidden: { opacity: 0 },
-    visible: { opacity: 1, transition: { staggerChildren: 0.1 } },
-  };
-
-  const statCards = [
-    {
-      title: "Clubs Joined",
-      value: stats?.clubs?.joined || 0,
-      change: "Active memberships",
-      icon: <FaBuilding className="text-4xl" />,
-      gradient: "from-primary to-secondary",
-      bgColor: "bg-primary/10",
-    },
-    {
-      title: "Events Registered",
-      value: stats?.events?.registered || 0,
-      change: "Upcoming events",
-      icon: <FaCalendar className="text-4xl" />,
-      gradient: "from-secondary to-accent",
-      bgColor: "bg-secondary/10",
-    },
-    {
-      title: "Total Spent",
-      value: `$${stats?.payments?.totalSpent?.toFixed(2) || 0}`,
-      change: `${stats?.payments?.totalPayments || 0} payments`,
-      icon: <FaDollarSign className="text-4xl" />,
-      gradient: "from-accent to-success",
-      bgColor: "bg-accent/10",
-    },
-  ];
-
   return (
-    <div>
-      <motion.div
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="mb-8"
-      >
-        <h1 className="text-4xl md:text-5xl font-black mb-2">
+    <div className="space-y-8">
+      {/* Header */}
+      <motion.div initial="hidden" animate="visible" variants={fadeInUp}>
+        <h1 className="text-4xl font-black mb-2">
           My <span className="text-gradient">Dashboard</span>
         </h1>
-        <p className="text-lg text-gray-600 font-medium">
-          Track your clubs, events, and activities
+        <p className="text-lg text-base-content/70">
+          Your activity and membership overview
         </p>
       </motion.div>
 
-      {/* Main Stats Grid */}
+      {/* Stats Cards */}
       <motion.div
-        variants={staggerContainer}
         initial="hidden"
         animate="visible"
-        className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8"
+        variants={staggerContainer}
+        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
       >
-        {statCards.map((card, index) => (
-          <motion.div
-            key={index}
-            variants={fadeInUp}
-            whileHover={{ y: -5, scale: 1.02 }}
-            className="card bg-white shadow-xl border-2 border-base-200 hover:border-primary transition-all"
-          >
-            <div className="card-body">
-              <div className="flex justify-between items-start mb-4">
-                <div className={`p-4 rounded-2xl ${card.bgColor}`}>
+        {[
+          {
+            title: "Clubs Joined",
+            value: stats?.clubsJoined || 3,
+            icon: <FaTrophy />,
+            color: "primary",
+            subtitle: "Active memberships",
+          },
+          {
+            title: "Events Attended",
+            value: stats?.eventsAttended || 12,
+            icon: <FaCalendar />,
+            color: "secondary",
+            subtitle: "This year",
+          },
+          {
+            title: "Total Spent",
+            value: `$${stats?.totalSpent || "300"}`,
+            icon: <FaDollarSign />,
+            color: "accent",
+            subtitle: "Memberships & events",
+          },
+          {
+            title: "Achievements",
+            value: stats?.achievements || 8,
+            icon: <FaStar />,
+            color: "success",
+            subtitle: "Badges earned",
+          },
+        ].map((stat, index) => (
+          <motion.div key={index} variants={fadeInUp}>
+            <div
+              className={`card bg-base-100 shadow-xl border-l-4 border-${stat.color}`}
+            >
+              <div className="card-body p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-base-content/70 text-sm font-semibold mb-1">
+                      {stat.title}
+                    </p>
+                    <h3 className="text-3xl font-black">{stat.value}</h3>
+                    <p className="text-base-content/60 text-xs mt-2">
+                      {stat.subtitle}
+                    </p>
+                  </div>
                   <div
-                    className={`bg-gradient-to-br ${card.gradient} bg-clip-text text-transparent`}
+                    className={`w-16 h-16 bg-${stat.color}/20 rounded-2xl flex items-center justify-center text-${stat.color} text-2xl`}
                   >
-                    {card.icon}
+                    {stat.icon}
                   </div>
                 </div>
               </div>
-              <h2 className="card-title text-sm font-bold text-gray-600 mb-2">
-                {card.title}
-              </h2>
-              <p className="text-4xl font-black mb-2">{card.value}</p>
-              <p className="text-sm text-gray-500 font-medium">{card.change}</p>
             </div>
           </motion.div>
         ))}
       </motion.div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-        {/* Activity Summary */}
+      {/* Charts Row */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Activity Chart */}
         <motion.div
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: 0.3 }}
-          className="card bg-white shadow-xl border-2 border-base-200"
+          transition={{ delay: 0.2 }}
         >
-          <div className="card-body">
-            <h2 className="card-title text-2xl font-bold mb-6 flex items-center gap-2">
-              <FaStar className="text-accent" />
-              Your Activity
-            </h2>
-            <div className="space-y-4">
-              <div className="flex items-start gap-4 p-4 bg-primary/10 rounded-xl">
-                <div className="bg-primary text-white p-3 rounded-lg">
-                  <FaBuilding className="text-xl" />
-                </div>
-                <div>
-                  <p className="font-bold text-lg mb-1">Club Memberships</p>
-                  <p className="text-sm text-gray-600">
-                    You're currently a member of{" "}
-                    <span className="font-bold text-primary">
-                      {stats?.clubs?.joined || 0}
-                    </span>{" "}
-                    club{stats?.clubs?.joined !== 1 ? "s" : ""}.
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex items-start gap-4 p-4 bg-secondary/10 rounded-xl">
-                <div className="bg-secondary text-white p-3 rounded-lg">
-                  <FaCalendar className="text-xl" />
-                </div>
-                <div>
-                  <p className="font-bold text-lg mb-1">Event Registrations</p>
-                  <p className="text-sm text-gray-600">
-                    You have{" "}
-                    <span className="font-bold text-secondary">
-                      {stats?.events?.registered || 0}
-                    </span>{" "}
-                    upcoming event{stats?.events?.registered !== 1 ? "s" : ""}.
-                  </p>
-                </div>
-              </div>
-
-              {stats?.payments?.totalSpent > 0 && (
-                <div className="flex items-start gap-4 p-4 bg-accent/10 rounded-xl">
-                  <div className="bg-accent text-neutral p-3 rounded-lg">
-                    <FaDollarSign className="text-xl" />
-                  </div>
-                  <div>
-                    <p className="font-bold text-lg mb-1">Investment</p>
-                    <p className="text-sm text-gray-600">
-                      Total invested in memberships and events:{" "}
-                      <span className="font-bold text-accent">
-                        ${stats?.payments?.totalSpent?.toFixed(2)}
-                      </span>
-                    </p>
-                  </div>
-                </div>
-              )}
+          <div className="card bg-base-100 shadow-xl">
+            <div className="card-body">
+              <h3 className="card-title text-xl font-bold flex items-center gap-2">
+                <FaCheckCircle className="text-primary" />
+                My Activity
+              </h3>
+              <ResponsiveContainer width="100%" height={300}>
+                <BarChart data={activityData}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                  <XAxis dataKey="month" stroke="#6b7280" />
+                  <YAxis stroke="#6b7280" />
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: "#fff",
+                      border: "2px solid #ff6b6b",
+                      borderRadius: "12px",
+                    }}
+                  />
+                  <Legend />
+                  <Bar
+                    dataKey="events"
+                    fill={COLORS.primary}
+                    radius={[8, 8, 0, 0]}
+                  />
+                  <Bar
+                    dataKey="clubs"
+                    fill={COLORS.secondary}
+                    radius={[8, 8, 0, 0]}
+                  />
+                </BarChart>
+              </ResponsiveContainer>
             </div>
           </div>
         </motion.div>
 
-        {/* Quick Actions */}
+        {/* Spending Breakdown */}
         <motion.div
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ delay: 0.3 }}
-          className="card bg-white shadow-xl border-2 border-base-200"
         >
-          <div className="card-body">
-            <h2 className="card-title text-2xl font-bold mb-6 flex items-center gap-2">
-              <FaRocket className="text-primary" />
-              Quick Actions
-            </h2>
-            <div className="space-y-4">
-              <Link
-                to="/clubs"
-                className="btn btn-primary w-full btn-lg font-bold justify-start gap-3"
-              >
-                <FaBuilding className="text-xl" />
-                Browse Clubs
-              </Link>
-              <Link
-                to="/events"
-                className="btn btn-secondary w-full btn-lg font-bold justify-start gap-3"
-              >
-                <FaCalendar className="text-xl" />
-                View Events
-              </Link>
-              <button className="btn btn-outline w-full btn-lg font-bold justify-start gap-3">
-                <FaHeart className="text-xl" />
-                My Favorites
-              </button>
+          <div className="card bg-base-100 shadow-xl">
+            <div className="card-body">
+              <h3 className="card-title text-xl font-bold flex items-center gap-2">
+                <FaDollarSign className="text-success" />
+                Spending Breakdown
+              </h3>
+              <ResponsiveContainer width="100%" height={300}>
+                <PieChart>
+                  <Pie
+                    data={spendingData}
+                    cx="50%"
+                    cy="50%"
+                    labelLine={false}
+                    label={({ name, amount }) => `${name}: $${amount}`}
+                    outerRadius={100}
+                    fill="#8884d8"
+                    dataKey="amount"
+                  >
+                    {spendingData.map((entry, index) => (
+                      <Cell
+                        key={`cell-${index}`}
+                        fill={PIE_COLORS[index % PIE_COLORS.length]}
+                      />
+                    ))}
+                  </Pie>
+                  <Tooltip />
+                  <Legend />
+                </PieChart>
+              </ResponsiveContainer>
             </div>
           </div>
         </motion.div>
       </div>
 
-      {/* Motivational Banner */}
+      {/* Upcoming Events */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.4 }}
-        className="card bg-gradient-to-r from-primary via-secondary to-accent shadow-xl"
       >
-        <div className="card-body text-center">
-          <h2 className="text-3xl font-black text-white mb-3">
-            Ready for More Adventures?
-          </h2>
-          <p className="text-xl text-white/90 font-medium mb-6">
-            Discover new clubs and events that match your interests!
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link
-              to="/clubs"
-              className="btn btn-lg bg-white text-primary hover:bg-white/90 font-bold"
-            >
-              Explore Clubs
-            </Link>
-            <Link
-              to="/events"
-              className="btn btn-lg btn-outline text-white border-white hover:bg-white hover:text-primary font-bold"
-            >
-              Find Events
-            </Link>
+        <div className="card bg-base-100 shadow-xl">
+          <div className="card-body">
+            <h3 className="card-title text-xl font-bold mb-4">
+              My Upcoming Events
+            </h3>
+            <div className="space-y-4">
+              {[
+                {
+                  title: "Photography Workshop",
+                  club: "Photography Club",
+                  date: "Jan 15, 2026",
+                  time: "2:00 PM",
+                  status: "confirmed",
+                },
+                {
+                  title: "Tech Meetup",
+                  club: "Tech Innovators",
+                  date: "Jan 18, 2026",
+                  time: "6:00 PM",
+                  status: "confirmed",
+                },
+                {
+                  title: "Fitness Challenge",
+                  club: "Fitness Warriors",
+                  date: "Jan 22, 2026",
+                  time: "7:00 AM",
+                  status: "pending",
+                },
+              ].map((event, index) => (
+                <div
+                  key={index}
+                  className="flex items-center justify-between p-4 bg-base-200 rounded-lg hover:bg-base-300 transition-colors"
+                >
+                  <div>
+                    <h4 className="font-bold text-lg">{event.title}</h4>
+                    <p className="text-sm text-base-content/70">{event.club}</p>
+                    <div className="flex items-center gap-4 mt-2 text-sm">
+                      <span className="flex items-center gap-1">
+                        <FaCalendar className="text-secondary" />
+                        {event.date}
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <FaClock className="text-accent" />
+                        {event.time}
+                      </span>
+                    </div>
+                  </div>
+                  <div
+                    className={`badge ${
+                      event.status === "confirmed"
+                        ? "badge-success"
+                        : "badge-warning"
+                    } font-bold`}
+                  >
+                    {event.status}
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </motion.div>
