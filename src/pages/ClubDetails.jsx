@@ -4,6 +4,11 @@ import { motion } from "framer-motion";
 import { useClubDetails } from "../hooks/useClubs";
 import useAuth from "../hooks/useAuth";
 import PaymentModal from "../components/PaymentModal";
+import ImageGallery from "../components/ImageGallery";
+import ReviewsSection from "../components/ReviewsSection";
+import RelatedItems from "../components/RelatedItems";
+import { useReviews, useAddReview } from "../hooks/useReviews";
+import { useClubs } from "../hooks/useClubs";
 import {
   FaUsers,
   FaMapMarkerAlt,
@@ -12,12 +17,50 @@ import {
   FaArrowLeft,
   FaCheckCircle,
 } from "react-icons/fa";
+import { toast } from "react-hot-toast";
 
 const ClubDetails = () => {
   const { id } = useParams();
   const { user } = useAuth();
   const { data: club, isLoading, isError } = useClubDetails(id);
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
+
+  // Fetch reviews
+  const { data: reviews = [] } = useReviews("club", id);
+
+  // Fetch related clubs (same category)
+  const { data: allClubs } = useClubs({
+    category: club?.category,
+  });
+
+  // Add review mutation
+  const addReviewMutation = useAddReview();
+
+  const handleAddReview = async (reviewData) => {
+    try {
+      await addReviewMutation.mutateAsync({
+        itemType: "club",
+        itemId: id,
+        ...reviewData,
+      });
+    } catch (error) {
+      throw error;
+    }
+  };
+
+  // Gallery images (using club banner + mock images)
+  const galleryImages =
+    club?.images?.length > 0
+      ? club.images
+      : [
+          club?.bannerImage ||
+            `https://source.unsplash.com/1600x900/?${club?.category},club`,
+          `https://source.unsplash.com/1600x900/?${club?.category},team`,
+          `https://source.unsplash.com/1600x900/?${club?.category},community`,
+          `https://source.unsplash.com/1600x900/?${club?.category},group`,
+          `https://source.unsplash.com/1600x900/?${club?.category},activity`,
+          `https://source.unsplash.com/1600x900/?${club?.category},members`,
+        ];
 
   if (isLoading) {
     return (
@@ -107,77 +150,124 @@ const ClubDetails = () => {
       <div className="container mx-auto px-4 py-12">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Main Content */}
-          <div className="lg:col-span-2">
+          <div className="lg:col-span-2 space-y-12">
+            {/* About Section */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="bg-white rounded-2xl shadow-xl p-8 border-2 border-base-200"
+              className="card bg-base-100 shadow-xl border-2 border-base-200"
             >
-              <h2 className="text-3xl font-bold mb-6 flex items-center gap-3">
-                <span className="w-2 h-8 bg-primary rounded"></span>
-                About This Club
-              </h2>
-              <p className="text-lg text-gray-700 leading-relaxed whitespace-pre-wrap mb-8">
-                {club.description}
-              </p>
+              <div className="card-body p-8">
+                <h2 className="text-3xl font-bold mb-6 flex items-center gap-3">
+                  <span className="w-2 h-8 bg-primary rounded"></span>
+                  About This Club
+                </h2>
+                <p className="text-lg text-base-content/80 leading-relaxed whitespace-pre-wrap mb-8">
+                  {club.description}
+                </p>
 
-              <div className="divider"></div>
+                <div className="divider"></div>
 
-              <h3 className="text-2xl font-bold mb-6">Club Information</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="flex items-start gap-4 bg-base-200 p-4 rounded-xl">
-                  <div className="bg-primary text-white p-3 rounded-lg">
-                    <FaMapMarkerAlt className="text-xl" />
+                <h3 className="text-2xl font-bold mb-6">Club Information</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="flex items-start gap-4 bg-base-200 p-4 rounded-xl">
+                    <div className="bg-primary text-white p-3 rounded-lg">
+                      <FaMapMarkerAlt className="text-xl" />
+                    </div>
+                    <div>
+                      <p className="font-bold text-sm text-base-content/70">
+                        Location
+                      </p>
+                      <p className="font-semibold text-lg">{club.location}</p>
+                    </div>
                   </div>
-                  <div>
-                    <p className="font-bold text-sm text-gray-600">Location</p>
-                    <p className="font-semibold text-lg">{club.location}</p>
-                  </div>
-                </div>
 
-                <div className="flex items-start gap-4 bg-base-200 p-4 rounded-xl">
-                  <div className="bg-secondary text-white p-3 rounded-lg">
-                    <FaUsers className="text-xl" />
+                  <div className="flex items-start gap-4 bg-base-200 p-4 rounded-xl">
+                    <div className="bg-secondary text-white p-3 rounded-lg">
+                      <FaUsers className="text-xl" />
+                    </div>
+                    <div>
+                      <p className="font-bold text-sm text-base-content/70">
+                        Members
+                      </p>
+                      <p className="font-semibold text-lg">
+                        {club.memberCount || 0} Active
+                      </p>
+                    </div>
                   </div>
-                  <div>
-                    <p className="font-bold text-sm text-gray-600">Members</p>
-                    <p className="font-semibold text-lg">
-                      {club.memberCount || 0} Active
-                    </p>
-                  </div>
-                </div>
 
-                <div className="flex items-start gap-4 bg-base-200 p-4 rounded-xl">
-                  <div className="bg-accent text-neutral p-3 rounded-lg">
-                    <FaDollarSign className="text-xl" />
+                  <div className="flex items-start gap-4 bg-base-200 p-4 rounded-xl">
+                    <div className="bg-accent text-neutral p-3 rounded-lg">
+                      <FaDollarSign className="text-xl" />
+                    </div>
+                    <div>
+                      <p className="font-bold text-sm text-base-content/70">
+                        Membership Fee
+                      </p>
+                      <p className="font-semibold text-lg">
+                        {club.membershipFee > 0
+                          ? `$${club.membershipFee}`
+                          : "Free to Join"}
+                      </p>
+                    </div>
                   </div>
-                  <div>
-                    <p className="font-bold text-sm text-gray-600">
-                      Membership Fee
-                    </p>
-                    <p className="font-semibold text-lg">
-                      {club.membershipFee > 0
-                        ? `$${club.membershipFee}`
-                        : "Free to Join"}
-                    </p>
-                  </div>
-                </div>
 
-                <div className="flex items-start gap-4 bg-base-200 p-4 rounded-xl">
-                  <div className="bg-info text-white p-3 rounded-lg">
-                    <FaCalendar className="text-xl" />
-                  </div>
-                  <div>
-                    <p className="font-bold text-sm text-gray-600">
-                      Established
-                    </p>
-                    <p className="font-semibold text-lg">
-                      {new Date(club.createdAt).toLocaleDateString()}
-                    </p>
+                  <div className="flex items-start gap-4 bg-base-200 p-4 rounded-xl">
+                    <div className="bg-info text-white p-3 rounded-lg">
+                      <FaCalendar className="text-xl" />
+                    </div>
+                    <div>
+                      <p className="font-bold text-sm text-base-content/70">
+                        Established
+                      </p>
+                      <p className="font-semibold text-lg">
+                        {new Date(club.createdAt).toLocaleDateString()}
+                      </p>
+                    </div>
                   </div>
                 </div>
               </div>
             </motion.div>
+
+            {/* Image Gallery Section */}
+            <motion.section
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="card bg-base-100 shadow-xl border-2 border-base-200"
+            >
+              <div className="card-body p-8">
+                <h2 className="text-3xl font-black mb-6">Gallery</h2>
+                <ImageGallery images={galleryImages} />
+              </div>
+            </motion.section>
+
+            {/* Reviews Section */}
+            <motion.section
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+            >
+              <ReviewsSection
+                reviews={reviews}
+                itemType="club"
+                itemId={id}
+                onAddReview={handleAddReview}
+              />
+            </motion.section>
+
+            {/* Related Clubs Section */}
+            <motion.section
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+            >
+              <RelatedItems
+                items={allClubs || []}
+                type="clubs"
+                currentItemId={id}
+              />
+            </motion.section>
           </div>
 
           {/* Sidebar */}
@@ -185,53 +275,55 @@ const ClubDetails = () => {
             <motion.div
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
-              className="bg-white rounded-2xl shadow-xl p-8 sticky top-24 border-2 border-base-200"
+              className="card bg-base-100 shadow-xl border-2 border-base-200 sticky top-24"
             >
-              <h3 className="text-2xl font-bold mb-6">Join This Club</h3>
+              <div className="card-body p-8">
+                <h3 className="text-2xl font-bold mb-6">Join This Club</h3>
 
-              {club.membershipFee > 0 && (
-                <div className="bg-primary/10 border-2 border-primary rounded-xl p-6 mb-6">
-                  <div className="text-center">
-                    <p className="text-sm font-semibold text-gray-600 mb-2">
-                      Membership Fee
-                    </p>
-                    <div className="text-4xl font-black text-primary">
-                      ${club.membershipFee}
+                {club.membershipFee > 0 && (
+                  <div className="bg-primary/10 border-2 border-primary rounded-xl p-6 mb-6">
+                    <div className="text-center">
+                      <p className="text-sm font-semibold text-base-content/70 mb-2">
+                        Membership Fee
+                      </p>
+                      <div className="text-4xl font-black text-primary">
+                        ${club.membershipFee}
+                      </div>
+                      <p className="text-sm text-base-content/70 mt-2">
+                        One-time payment
+                      </p>
                     </div>
-                    <p className="text-sm text-gray-600 mt-2">
-                      One-time payment
-                    </p>
+                  </div>
+                )}
+
+                <div className="space-y-3 mb-6">
+                  <div className="flex items-center gap-3 text-sm">
+                    <FaCheckCircle className="text-success text-lg" />
+                    <span>Access to exclusive events</span>
+                  </div>
+                  <div className="flex items-center gap-3 text-sm">
+                    <FaCheckCircle className="text-success text-lg" />
+                    <span>Connect with members</span>
+                  </div>
+                  <div className="flex items-center gap-3 text-sm">
+                    <FaCheckCircle className="text-success text-lg" />
+                    <span>Participate in activities</span>
                   </div>
                 </div>
-              )}
 
-              <div className="space-y-3 mb-6">
-                <div className="flex items-center gap-3 text-sm">
-                  <FaCheckCircle className="text-success text-lg" />
-                  <span>Access to exclusive events</span>
-                </div>
-                <div className="flex items-center gap-3 text-sm">
-                  <FaCheckCircle className="text-success text-lg" />
-                  <span>Connect with members</span>
-                </div>
-                <div className="flex items-center gap-3 text-sm">
-                  <FaCheckCircle className="text-success text-lg" />
-                  <span>Participate in activities</span>
-                </div>
+                <button
+                  onClick={handleJoinClick}
+                  className="btn btn-primary w-full btn-lg font-bold"
+                >
+                  {club.membershipFee > 0 ? "Join Now" : "Join Free"}
+                </button>
+
+                <div className="divider">OR</div>
+
+                <Link to="/clubs" className="btn btn-outline w-full font-bold">
+                  Browse More Clubs
+                </Link>
               </div>
-
-              <button
-                onClick={handleJoinClick}
-                className="btn btn-primary w-full btn-lg font-bold"
-              >
-                {club.membershipFee > 0 ? "Join Now" : "Join Free"}
-              </button>
-
-              <div className="divider">OR</div>
-
-              <Link to="/clubs" className="btn btn-outline w-full font-bold">
-                Browse More Clubs
-              </Link>
             </motion.div>
           </div>
         </div>

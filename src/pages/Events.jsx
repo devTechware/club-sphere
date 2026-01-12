@@ -3,6 +3,7 @@ import { Link } from "react-router";
 import { motion } from "framer-motion";
 import { useEvents } from "../hooks/useEvents";
 import EventCardSkeleton from "../components/skeletons/EventCardSkeleton";
+import Pagination from "../components/Pagination";
 import {
   FaSearch,
   FaFilter,
@@ -17,6 +18,8 @@ const Events = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterType, setFilterType] = useState("all");
   const [sortBy, setSortBy] = useState("date");
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 12;
 
   const { data: events, isLoading } = useEvents({
     search: searchTerm,
@@ -57,6 +60,17 @@ const Events = () => {
     return new Date(eventDate) >= new Date();
   };
 
+  // Pagination logic
+  const totalPages = events ? Math.ceil(events.length / itemsPerPage) : 0;
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const paginatedEvents = events?.slice(startIndex, endIndex);
+
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
   return (
     <div className="min-h-screen bg-base-100">
       {/* Header Section */}
@@ -81,7 +95,10 @@ const Events = () => {
                 placeholder="Search events by title or description..."
                 className="input input-bordered input-lg w-full pl-12 pr-4 shadow-lg"
                 value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
+                onChange={(e) => {
+                  setSearchTerm(e.target.value);
+                  setCurrentPage(1); // Reset to first page on search
+                }}
               />
             </div>
           </motion.div>
@@ -96,7 +113,10 @@ const Events = () => {
               {filterOptions.map((option) => (
                 <button
                   key={option.value}
-                  onClick={() => setFilterType(option.value)}
+                  onClick={() => {
+                    setFilterType(option.value);
+                    setCurrentPage(1); // Reset to first page on filter
+                  }}
                   className={`btn btn-sm ${
                     filterType === option.value
                       ? "btn-secondary"
@@ -141,7 +161,7 @@ const Events = () => {
           {/* Skeleton Loading State */}
           {isLoading && (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {[...Array(8)].map((_, index) => (
+              {[...Array(12)].map((_, index) => (
                 <EventCardSkeleton key={index} />
               ))}
             </div>
@@ -164,6 +184,7 @@ const Events = () => {
                   setSearchTerm("");
                   setFilterType("all");
                   setSortBy("date");
+                  setCurrentPage(1);
                 }}
                 className="btn btn-secondary"
               >
@@ -173,112 +194,123 @@ const Events = () => {
           )}
 
           {/* Events Grid */}
-          {!isLoading && events && events.length > 0 && (
-            <motion.div
-              initial="hidden"
-              animate="visible"
-              variants={staggerContainer}
-              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
-            >
-              {events.map((event) => (
-                <motion.div key={event._id} variants={fadeInUp}>
-                  <Link to={`/events/${event._id}`}>
-                    <div className="card bg-base-100 shadow-xl border-2 border-base-200 card-hover h-full">
-                      <div className="card-body p-5">
-                        <div className="flex items-start justify-between mb-3">
-                          <div className="badge badge-secondary font-bold text-xs">
-                            {event.clubName}
-                          </div>
-                          {event.isPaid ? (
-                            <div className="badge badge-accent font-bold text-xs">
-                              ${event.eventFee}
+          {!isLoading && paginatedEvents && paginatedEvents.length > 0 && (
+            <>
+              <motion.div
+                initial="hidden"
+                animate="visible"
+                variants={staggerContainer}
+                className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
+              >
+                {paginatedEvents.map((event) => (
+                  <motion.div key={event._id} variants={fadeInUp}>
+                    <Link to={`/events/${event._id}`}>
+                      <div className="card bg-base-100 shadow-xl border-2 border-base-200 card-hover h-full">
+                        <div className="card-body p-5">
+                          <div className="flex items-start justify-between mb-3">
+                            <div className="badge badge-secondary font-bold text-xs">
+                              {event.clubName}
                             </div>
-                          ) : (
-                            <div className="badge badge-success font-bold text-xs">
-                              FREE
-                            </div>
-                          )}
-                        </div>
-
-                        <h3 className="card-title text-lg font-bold line-clamp-2 mb-2">
-                          {event.title}
-                        </h3>
-
-                        <p className="text-base-content/70 text-sm line-clamp-2 leading-relaxed mb-3">
-                          {event.description}
-                        </p>
-
-                        <div className="divider my-2"></div>
-
-                        <div className="space-y-2">
-                          <div className="flex items-center gap-2 text-sm">
-                            <FaCalendar className="text-secondary flex-shrink-0" />
-                            <span className="font-semibold">
-                              {new Date(event.eventDate).toLocaleDateString(
-                                "en-US",
-                                {
-                                  month: "short",
-                                  day: "numeric",
-                                  year: "numeric",
-                                }
-                              )}
-                            </span>
+                            {event.isPaid ? (
+                              <div className="badge badge-accent font-bold text-xs">
+                                ${event.eventFee}
+                              </div>
+                            ) : (
+                              <div className="badge badge-success font-bold text-xs">
+                                FREE
+                              </div>
+                            )}
                           </div>
 
-                          <div className="flex items-center gap-2 text-sm">
-                            <FaClock className="text-accent flex-shrink-0" />
-                            <span className="font-semibold">
-                              {new Date(event.eventDate).toLocaleTimeString(
-                                "en-US",
-                                {
-                                  hour: "2-digit",
-                                  minute: "2-digit",
-                                }
-                              )}
-                            </span>
-                          </div>
+                          <h3 className="card-title text-lg font-bold line-clamp-2 mb-2">
+                            {event.title}
+                          </h3>
 
-                          <div className="flex items-center gap-2 text-sm">
-                            <FaMapMarkerAlt className="text-primary flex-shrink-0" />
-                            <span className="truncate font-semibold">
-                              {event.location}
-                            </span>
-                          </div>
+                          <p className="text-base-content/70 text-sm line-clamp-2 leading-relaxed mb-3">
+                            {event.description}
+                          </p>
 
-                          {event.maxParticipants && (
+                          <div className="divider my-2"></div>
+
+                          <div className="space-y-2">
                             <div className="flex items-center gap-2 text-sm">
-                              <FaUsers className="text-info flex-shrink-0" />
+                              <FaCalendar className="text-secondary flex-shrink-0" />
                               <span className="font-semibold">
-                                {event.registeredCount || 0} /{" "}
-                                {event.maxParticipants} spots
+                                {new Date(event.eventDate).toLocaleDateString(
+                                  "en-US",
+                                  {
+                                    month: "short",
+                                    day: "numeric",
+                                    year: "numeric",
+                                  }
+                                )}
                               </span>
                             </div>
-                          )}
-                        </div>
 
-                        <button
-                          className={`btn btn-sm w-full mt-4 font-bold group ${
-                            isUpcoming(event.eventDate)
-                              ? "btn-secondary"
-                              : "btn-disabled"
-                          }`}
-                          disabled={!isUpcoming(event.eventDate)}
-                        >
-                          {isUpcoming(event.eventDate) ? (
-                            <>
-                              Register Now
-                              <FaArrowRight className="group-hover:translate-x-1 transition-transform" />
-                            </>
-                          ) : (
-                            "Event Ended"
-                          )}
-                        </button>
+                            <div className="flex items-center gap-2 text-sm">
+                              <FaClock className="text-accent flex-shrink-0" />
+                              <span className="font-semibold">
+                                {new Date(event.eventDate).toLocaleTimeString(
+                                  "en-US",
+                                  {
+                                    hour: "2-digit",
+                                    minute: "2-digit",
+                                  }
+                                )}
+                              </span>
+                            </div>
+
+                            <div className="flex items-center gap-2 text-sm">
+                              <FaMapMarkerAlt className="text-primary flex-shrink-0" />
+                              <span className="truncate font-semibold">
+                                {event.location}
+                              </span>
+                            </div>
+
+                            {event.maxParticipants && (
+                              <div className="flex items-center gap-2 text-sm">
+                                <FaUsers className="text-info flex-shrink-0" />
+                                <span className="font-semibold">
+                                  {event.registeredCount || 0} /{" "}
+                                  {event.maxParticipants} spots
+                                </span>
+                              </div>
+                            )}
+                          </div>
+
+                          <button
+                            className={`btn btn-sm w-full mt-4 font-bold group ${
+                              isUpcoming(event.eventDate)
+                                ? "btn-secondary"
+                                : "btn-disabled"
+                            }`}
+                            disabled={!isUpcoming(event.eventDate)}
+                          >
+                            {isUpcoming(event.eventDate) ? (
+                              <>
+                                Register Now
+                                <FaArrowRight className="group-hover:translate-x-1 transition-transform" />
+                              </>
+                            ) : (
+                              "Event Ended"
+                            )}
+                          </button>
+                        </div>
                       </div>
-                    </div>
-                  </Link>
-                </motion.div>
-              ))}
-            </motion.div>
+                    </Link>
+                  </motion.div>
+                ))}
+              </motion.div>
+
+              {/* Pagination Component */}
+              <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={handlePageChange}
+                itemsPerPage={itemsPerPage}
+                totalItems={events.length}
+              />
+            </>
           )}
         </div>
       </section>

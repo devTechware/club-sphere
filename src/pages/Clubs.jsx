@@ -3,12 +3,15 @@ import { Link } from "react-router";
 import { motion } from "framer-motion";
 import { useClubs } from "../hooks/useClubs";
 import CardSkeleton from "../components/skeletons/CardSkeleton";
+import Pagination from "../components/Pagination";
 import { FaSearch, FaFilter, FaUsers, FaArrowRight } from "react-icons/fa";
 
 const Clubs = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("");
   const [sortBy, setSortBy] = useState("newest");
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 12;
 
   const { data: clubs, isLoading } = useClubs({
     search: searchTerm,
@@ -51,6 +54,17 @@ const Clubs = () => {
     },
   };
 
+  // Pagination logic
+  const totalPages = clubs ? Math.ceil(clubs.length / itemsPerPage) : 0;
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const paginatedClubs = clubs?.slice(startIndex, endIndex);
+
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
   return (
     <div className="min-h-screen bg-base-100">
       {/* Header Section */}
@@ -76,7 +90,10 @@ const Clubs = () => {
                 placeholder="Search clubs by name or description..."
                 className="input input-bordered input-lg w-full pl-12 pr-4 shadow-lg"
                 value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
+                onChange={(e) => {
+                  setSearchTerm(e.target.value);
+                  setCurrentPage(1); // Reset to first page on search
+                }}
               />
             </div>
           </motion.div>
@@ -92,9 +109,10 @@ const Clubs = () => {
               {categories.map((category) => (
                 <button
                   key={category}
-                  onClick={() =>
-                    setSelectedCategory(category === "All" ? "" : category)
-                  }
+                  onClick={() => {
+                    setSelectedCategory(category === "All" ? "" : category);
+                    setCurrentPage(1); // Reset to first page on filter
+                  }}
                   className={`btn btn-sm ${
                     (category === "All" && !selectedCategory) ||
                     selectedCategory === category
@@ -143,7 +161,7 @@ const Clubs = () => {
           {/* Skeleton Loading State */}
           {isLoading && (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {[...Array(8)].map((_, index) => (
+              {[...Array(12)].map((_, index) => (
                 <CardSkeleton key={index} />
               ))}
             </div>
@@ -166,6 +184,7 @@ const Clubs = () => {
                   setSearchTerm("");
                   setSelectedCategory("");
                   setSortBy("newest");
+                  setCurrentPage(1);
                 }}
                 className="btn btn-primary"
               >
@@ -175,72 +194,83 @@ const Clubs = () => {
           )}
 
           {/* Clubs Grid */}
-          {!isLoading && clubs && clubs.length > 0 && (
-            <motion.div
-              initial="hidden"
-              animate="visible"
-              variants={staggerContainer}
-              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
-            >
-              {clubs.map((club) => (
-                <motion.div key={club._id} variants={fadeInUp}>
-                  <Link to={`/clubs/${club._id}`}>
-                    <div className="card bg-base-100 shadow-xl border-2 border-base-200 overflow-hidden card-hover h-full">
-                      <figure className="h-48 overflow-hidden relative">
-                        <img
-                          src={
-                            club.bannerImage ||
-                            `https://ui-avatars.com/api/?name=${club.clubName}&size=600&background=random`
-                          }
-                          alt={club.clubName}
-                          className="w-full h-full object-cover"
-                        />
-                        <div className="absolute top-3 left-3">
-                          <div className="badge badge-primary font-bold shadow-lg">
-                            {club.category}
-                          </div>
-                        </div>
-                        {club.status === "pending" && (
-                          <div className="absolute top-3 right-3">
-                            <div className="badge badge-warning font-bold shadow-lg">
-                              Pending
+          {!isLoading && paginatedClubs && paginatedClubs.length > 0 && (
+            <>
+              <motion.div
+                initial="hidden"
+                animate="visible"
+                variants={staggerContainer}
+                className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
+              >
+                {paginatedClubs.map((club) => (
+                  <motion.div key={club._id} variants={fadeInUp}>
+                    <Link to={`/clubs/${club._id}`}>
+                      <div className="card bg-base-100 shadow-xl border-2 border-base-200 overflow-hidden card-hover h-full">
+                        <figure className="h-48 overflow-hidden relative">
+                          <img
+                            src={
+                              club.bannerImage ||
+                              `https://ui-avatars.com/api/?name=${club.clubName}&size=600&background=random`
+                            }
+                            alt={club.clubName}
+                            className="w-full h-full object-cover"
+                          />
+                          <div className="absolute top-3 left-3">
+                            <div className="badge badge-primary font-bold shadow-lg">
+                              {club.category}
                             </div>
                           </div>
-                        )}
-                      </figure>
+                          {club.status === "pending" && (
+                            <div className="absolute top-3 right-3">
+                              <div className="badge badge-warning font-bold shadow-lg">
+                                Pending
+                              </div>
+                            </div>
+                          )}
+                        </figure>
 
-                      <div className="card-body p-5">
-                        <h3 className="card-title text-lg font-bold line-clamp-1">
-                          {club.clubName}
-                        </h3>
-                        <p className="text-base-content/70 text-sm line-clamp-2 leading-relaxed">
-                          {club.description}
-                        </p>
+                        <div className="card-body p-5">
+                          <h3 className="card-title text-lg font-bold line-clamp-1">
+                            {club.clubName}
+                          </h3>
+                          <p className="text-base-content/70 text-sm line-clamp-2 leading-relaxed">
+                            {club.description}
+                          </p>
 
-                        <div className="flex items-center justify-between mt-3 pt-3 border-t border-base-300">
-                          <div className="flex items-center gap-2">
-                            <FaUsers className="text-secondary text-sm" />
-                            <span className="text-xs font-bold">
-                              {club.memberCount || 0} members
-                            </span>
+                          <div className="flex items-center justify-between mt-3 pt-3 border-t border-base-300">
+                            <div className="flex items-center gap-2">
+                              <FaUsers className="text-secondary text-sm" />
+                              <span className="text-xs font-bold">
+                                {club.memberCount || 0} members
+                              </span>
+                            </div>
+                            <div className="badge badge-accent font-bold text-xs">
+                              {club.membershipFee === 0
+                                ? "FREE"
+                                : `$${club.membershipFee}`}
+                            </div>
                           </div>
-                          <div className="badge badge-accent font-bold text-xs">
-                            {club.membershipFee === 0
-                              ? "FREE"
-                              : `$${club.membershipFee}`}
-                          </div>
+
+                          <button className="btn btn-primary btn-sm w-full mt-3 font-bold group">
+                            Join Club
+                            <FaArrowRight className="group-hover:translate-x-1 transition-transform" />
+                          </button>
                         </div>
-
-                        <button className="btn btn-primary btn-sm w-full mt-3 font-bold group">
-                          Join Club
-                          <FaArrowRight className="group-hover:translate-x-1 transition-transform" />
-                        </button>
                       </div>
-                    </div>
-                  </Link>
-                </motion.div>
-              ))}
-            </motion.div>
+                    </Link>
+                  </motion.div>
+                ))}
+              </motion.div>
+
+              {/* Pagination Component */}
+              <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={handlePageChange}
+                itemsPerPage={itemsPerPage}
+                totalItems={clubs.length}
+              />
+            </>
           )}
         </div>
       </section>

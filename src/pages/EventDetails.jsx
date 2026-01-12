@@ -4,6 +4,11 @@ import { motion } from "framer-motion";
 import { useEventDetails } from "../hooks/useEvents";
 import useAuth from "../hooks/useAuth";
 import PaymentModal from "../components/PaymentModal";
+import ImageGallery from "../components/ImageGallery";
+import ReviewsSection from "../components/ReviewsSection";
+import RelatedItems from "../components/RelatedItems";
+import { useReviews, useAddReview } from "../hooks/useReviews";
+import { useEvents } from "../hooks/useEvents";
 import {
   FaCalendar,
   FaMapMarkerAlt,
@@ -20,6 +25,43 @@ const EventDetails = () => {
   const { user } = useAuth();
   const { data: event, isLoading, isError } = useEventDetails(id);
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
+
+  // Fetch reviews
+  const { data: reviews = [] } = useReviews("event", id);
+
+  // Fetch related events (same club)
+  const { data: allEvents } = useEvents();
+
+  // Add review mutation
+  const addReviewMutation = useAddReview();
+
+  const handleAddReview = async (reviewData) => {
+    try {
+      await addReviewMutation.mutateAsync({
+        itemType: "event",
+        itemId: id,
+        ...reviewData,
+      });
+    } catch (error) {
+      throw error;
+    }
+  };
+
+  // Gallery images for events
+  const galleryImages =
+    event?.images?.length > 0
+      ? event.images
+      : [
+          `https://source.unsplash.com/1600x900/?event,${event?.title?.replace(
+            /\s+/g,
+            "-"
+          )}`,
+          `https://source.unsplash.com/1600x900/?conference,meeting`,
+          `https://source.unsplash.com/1600x900/?workshop,training`,
+          `https://source.unsplash.com/1600x900/?seminar,presentation`,
+          `https://source.unsplash.com/1600x900/?gathering,community`,
+          `https://source.unsplash.com/1600x900/?networking,people`,
+        ];
 
   if (isLoading) {
     return (
@@ -135,19 +177,22 @@ const EventDetails = () => {
       <div className="container mx-auto px-4 py-12">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Main Content */}
-          <div className="lg:col-span-2">
+          <div className="lg:col-span-2 space-y-12">
+            {/* About Section */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="bg-white rounded-2xl shadow-xl p-8 border-2 border-base-200 mb-8"
+              className="card bg-base-100 shadow-xl border-2 border-base-200"
             >
-              <h2 className="text-3xl font-bold mb-6 flex items-center gap-3">
-                <span className="w-2 h-8 bg-secondary rounded"></span>
-                About This Event
-              </h2>
-              <p className="text-lg text-gray-700 leading-relaxed whitespace-pre-wrap">
-                {event.description}
-              </p>
+              <div className="card-body p-8">
+                <h2 className="text-3xl font-bold mb-6 flex items-center gap-3">
+                  <span className="w-2 h-8 bg-secondary rounded"></span>
+                  About This Event
+                </h2>
+                <p className="text-lg text-base-content/80 leading-relaxed whitespace-pre-wrap">
+                  {event.description}
+                </p>
+              </div>
             </motion.div>
 
             {/* Event Information Cards */}
@@ -155,87 +200,91 @@ const EventDetails = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
-              className="bg-white rounded-2xl shadow-xl p-8 border-2 border-base-200"
+              className="card bg-base-100 shadow-xl border-2 border-base-200"
             >
-              <h3 className="text-2xl font-bold mb-6">Event Details</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="flex items-start gap-4 bg-secondary/10 p-4 rounded-xl">
-                  <div className="bg-secondary text-white p-3 rounded-lg">
-                    <FaCalendar className="text-xl" />
-                  </div>
-                  <div>
-                    <p className="font-bold text-sm text-gray-600">
-                      Date & Time
-                    </p>
-                    <p className="font-semibold text-base">
-                      {eventDate.toLocaleDateString("en-US", {
-                        month: "short",
-                        day: "numeric",
-                        year: "numeric",
-                      })}
-                    </p>
-                    <p className="text-sm text-gray-600">
-                      {eventDate.toLocaleTimeString("en-US", {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex items-start gap-4 bg-primary/10 p-4 rounded-xl">
-                  <div className="bg-primary text-white p-3 rounded-lg">
-                    <FaMapMarkerAlt className="text-xl" />
-                  </div>
-                  <div className="min-w-0">
-                    <p className="font-bold text-sm text-gray-600">Location</p>
-                    <p className="font-semibold text-base break-words">
-                      {event.location}
-                    </p>
-                  </div>
-                </div>
-
-                {event.isPaid && (
-                  <div className="flex items-start gap-4 bg-accent/10 p-4 rounded-xl">
-                    <div className="bg-accent text-neutral p-3 rounded-lg">
-                      <FaDollarSign className="text-xl" />
+              <div className="card-body p-8">
+                <h3 className="text-2xl font-bold mb-6">Event Details</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="flex items-start gap-4 bg-secondary/10 p-4 rounded-xl">
+                    <div className="bg-secondary text-white p-3 rounded-lg">
+                      <FaCalendar className="text-xl" />
                     </div>
                     <div>
-                      <p className="font-bold text-sm text-gray-600">
-                        Registration Fee
+                      <p className="font-bold text-sm text-base-content/70">
+                        Date & Time
                       </p>
                       <p className="font-semibold text-base">
-                        ${event.eventFee}
+                        {eventDate.toLocaleDateString("en-US", {
+                          month: "short",
+                          day: "numeric",
+                          year: "numeric",
+                        })}
+                      </p>
+                      <p className="text-sm text-base-content/70">
+                        {eventDate.toLocaleTimeString("en-US", {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
                       </p>
                     </div>
                   </div>
-                )}
 
-                {event.maxAttendees && (
-                  <div className="flex items-start gap-4 bg-info/10 p-4 rounded-xl">
-                    <div className="bg-info text-white p-3 rounded-lg">
-                      <FaUsers className="text-xl" />
+                  <div className="flex items-start gap-4 bg-primary/10 p-4 rounded-xl">
+                    <div className="bg-primary text-white p-3 rounded-lg">
+                      <FaMapMarkerAlt className="text-xl" />
                     </div>
-                    <div>
-                      <p className="font-bold text-sm text-gray-600">
-                        Attendees
+                    <div className="min-w-0">
+                      <p className="font-bold text-sm text-base-content/70">
+                        Location
                       </p>
-                      <p className="font-semibold text-base">
-                        {event.registrationCount || 0} / {event.maxAttendees}
+                      <p className="font-semibold text-base break-words">
+                        {event.location}
                       </p>
-                      {spotsLeft !== null && spotsLeft > 0 && (
-                        <p className="text-sm text-success font-semibold">
-                          {spotsLeft} spots left
-                        </p>
-                      )}
-                      {spotsLeft === 0 && (
-                        <p className="text-sm text-error font-semibold">
-                          Event is full
-                        </p>
-                      )}
                     </div>
                   </div>
-                )}
+
+                  {event.isPaid && (
+                    <div className="flex items-start gap-4 bg-accent/10 p-4 rounded-xl">
+                      <div className="bg-accent text-neutral p-3 rounded-lg">
+                        <FaDollarSign className="text-xl" />
+                      </div>
+                      <div>
+                        <p className="font-bold text-sm text-base-content/70">
+                          Registration Fee
+                        </p>
+                        <p className="font-semibold text-base">
+                          ${event.eventFee}
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {event.maxAttendees && (
+                    <div className="flex items-start gap-4 bg-info/10 p-4 rounded-xl">
+                      <div className="bg-info text-white p-3 rounded-lg">
+                        <FaUsers className="text-xl" />
+                      </div>
+                      <div>
+                        <p className="font-bold text-sm text-base-content/70">
+                          Attendees
+                        </p>
+                        <p className="font-semibold text-base">
+                          {event.registrationCount || 0} / {event.maxAttendees}
+                        </p>
+                        {spotsLeft !== null && spotsLeft > 0 && (
+                          <p className="text-sm text-success font-semibold">
+                            {spotsLeft} spots left
+                          </p>
+                        )}
+                        {spotsLeft === 0 && (
+                          <p className="text-sm text-error font-semibold">
+                            Event is full
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
             </motion.div>
 
@@ -244,16 +293,59 @@ const EventDetails = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3 }}
-              className="bg-white rounded-2xl shadow-xl p-6 border-2 border-base-200 mt-8"
+              className="card bg-base-100 shadow-xl border-2 border-base-200"
             >
-              <p className="text-sm text-gray-600 mb-2">Organized by</p>
-              <Link
-                to={`/clubs/${event.clubId}`}
-                className="text-xl font-bold text-secondary hover:underline"
-              >
-                {event.clubName}
-              </Link>
+              <div className="card-body p-6">
+                <p className="text-sm text-base-content/70 mb-2">
+                  Organized by
+                </p>
+                <Link
+                  to={`/clubs/${event.clubId}`}
+                  className="text-xl font-bold text-secondary hover:underline"
+                >
+                  {event.clubName}
+                </Link>
+              </div>
             </motion.div>
+
+            {/* Image Gallery Section */}
+            <motion.section
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+            >
+              <h2 className="text-3xl font-black mb-6">Event Gallery</h2>
+              <ImageGallery images={galleryImages} />
+            </motion.section>
+
+            {/* Reviews Section */}
+            <motion.section
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+            >
+              <ReviewsSection
+                reviews={reviews}
+                itemType="event"
+                itemId={id}
+                onAddReview={handleAddReview}
+              />
+            </motion.section>
+
+            {/* Related Events Section */}
+            <motion.section
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+            >
+              <RelatedItems
+                items={
+                  allEvents?.filter((e) => e.clubName === event.clubName) || []
+                }
+                type="events"
+                currentItemId={id}
+              />
+            </motion.section>
           </div>
 
           {/* Sidebar */}
@@ -261,73 +353,77 @@ const EventDetails = () => {
             <motion.div
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
-              className="bg-white rounded-2xl shadow-xl p-8 sticky top-24 border-2 border-base-200"
+              className="card bg-base-100 shadow-xl border-2 border-base-200 sticky top-24"
             >
-              <h3 className="text-2xl font-bold mb-6">Register for Event</h3>
+              <div className="card-body p-8">
+                <h3 className="text-2xl font-bold mb-6">Register for Event</h3>
 
-              {!isUpcoming ? (
-                <div className="alert alert-warning mb-6">
-                  <FaExclamationTriangle />
-                  <span>This event has already passed</span>
-                </div>
-              ) : spotsLeft === 0 ? (
-                <div className="alert alert-error mb-6">
-                  <FaExclamationTriangle />
-                  <span>Event is full</span>
-                </div>
-              ) : (
-                <>
-                  {event.isPaid && (
-                    <div className="bg-accent/10 border-2 border-accent rounded-xl p-6 mb-6">
-                      <div className="text-center">
-                        <p className="text-sm font-semibold text-gray-600 mb-2">
-                          Registration Fee
-                        </p>
-                        <div className="text-4xl font-black text-accent">
-                          ${event.eventFee}
+                {!isUpcoming ? (
+                  <div className="alert alert-warning mb-6">
+                    <FaExclamationTriangle />
+                    <span>This event has already passed</span>
+                  </div>
+                ) : spotsLeft === 0 ? (
+                  <div className="alert alert-error mb-6">
+                    <FaExclamationTriangle />
+                    <span>Event is full</span>
+                  </div>
+                ) : (
+                  <>
+                    {event.isPaid && (
+                      <div className="bg-accent/10 border-2 border-accent rounded-xl p-6 mb-6">
+                        <div className="text-center">
+                          <p className="text-sm font-semibold text-base-content/70 mb-2">
+                            Registration Fee
+                          </p>
+                          <div className="text-4xl font-black text-accent">
+                            ${event.eventFee}
+                          </div>
+                          <p className="text-sm text-base-content/70 mt-2">
+                            Per person
+                          </p>
                         </div>
-                        <p className="text-sm text-gray-600 mt-2">Per person</p>
-                      </div>
-                    </div>
-                  )}
-
-                  <div className="space-y-3 mb-6">
-                    <div className="flex items-center gap-3 text-sm">
-                      <FaCheckCircle className="text-success text-lg" />
-                      <span>Instant confirmation</span>
-                    </div>
-                    <div className="flex items-center gap-3 text-sm">
-                      <FaCheckCircle className="text-success text-lg" />
-                      <span>Email reminders</span>
-                    </div>
-                    <div className="flex items-center gap-3 text-sm">
-                      <FaCheckCircle className="text-success text-lg" />
-                      <span>Connect with attendees</span>
-                    </div>
-                    {spotsLeft && spotsLeft <= 10 && (
-                      <div className="flex items-center gap-3 text-sm text-warning font-bold">
-                        <FaExclamationTriangle />
-                        <span>Only {spotsLeft} spots left!</span>
                       </div>
                     )}
-                  </div>
 
-                  <button
-                    onClick={handleRegisterClick}
-                    className="btn btn-secondary w-full btn-lg font-bold"
-                  >
-                    {event.isPaid
-                      ? `Register - $${event.eventFee}`
-                      : "Register Free"}
-                  </button>
-                </>
-              )}
+                    <div className="space-y-3 mb-6">
+                      <div className="flex items-center gap-3 text-sm">
+                        <FaCheckCircle className="text-success text-lg" />
+                        <span>Instant confirmation</span>
+                      </div>
+                      <div className="flex items-center gap-3 text-sm">
+                        <FaCheckCircle className="text-success text-lg" />
+                        <span>Email reminders</span>
+                      </div>
+                      <div className="flex items-center gap-3 text-sm">
+                        <FaCheckCircle className="text-success text-lg" />
+                        <span>Connect with attendees</span>
+                      </div>
+                      {spotsLeft && spotsLeft <= 10 && (
+                        <div className="flex items-center gap-3 text-sm text-warning font-bold">
+                          <FaExclamationTriangle />
+                          <span>Only {spotsLeft} spots left!</span>
+                        </div>
+                      )}
+                    </div>
 
-              <div className="divider">OR</div>
+                    <button
+                      onClick={handleRegisterClick}
+                      className="btn btn-secondary w-full btn-lg font-bold"
+                    >
+                      {event.isPaid
+                        ? `Register - $${event.eventFee}`
+                        : "Register Free"}
+                    </button>
+                  </>
+                )}
 
-              <Link to="/events" className="btn btn-outline w-full font-bold">
-                Browse More Events
-              </Link>
+                <div className="divider">OR</div>
+
+                <Link to="/events" className="btn btn-outline w-full font-bold">
+                  Browse More Events
+                </Link>
+              </div>
             </motion.div>
           </div>
         </div>
