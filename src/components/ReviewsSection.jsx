@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { FaStar, FaRegStar, FaUserCircle } from "react-icons/fa";
-import { useAuth } from "../hooks/useAuth";
+import useAuth from "../hooks/useAuth";
 import { toast } from "react-hot-toast";
 
 const ReviewsSection = ({
